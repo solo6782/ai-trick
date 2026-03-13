@@ -1,6 +1,12 @@
 import { useState, useEffect } from 'react'
 
-const CHANGELOG = `## [0.6.2] - 2026-03-13
+const CHANGELOG = `## [0.6.3] - 2026-03-13
+
+### Amélioré
+- Terrain retourné : gardien en haut, attaquants en bas
+- Prompt : table explicite des combos formation/entraînement optimaux
+
+## [0.6.2] - 2026-03-13
 
 ### Amélioré
 - Prompt : Triangle d'analyse (compétences + notes historiques + phrases coach/scout)

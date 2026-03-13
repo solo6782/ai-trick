@@ -113,14 +113,25 @@ Une compétence principale élevée NE SUFFIT PAS à faire un bon joueur. Il fau
 Un joueur dont les compétences secondaires sont MAXÉES à des niveaux faibles (≤3) pour son poste naturel est un BOUCHE-TROU, même si sa compétence principale a un max élevé. Ne PAS gaspiller de l'entraînement sur lui.
 
 **PRIORITÉ 1 — Formation optimisée pour l'entraînement**
-La formation DOIT maximiser le nombre de joueurs en position entraînable pour le primaire ET le secondaire :
-- Si primaire = Buteur → maximiser les attaquants (2-5-3 ou 2-4-4 idéal, pas 4-4-2)
-- Si primaire = Construction → maximiser les milieux (2-5-3 ou 3-5-2 idéal)
-- Si primaire = Ailier → maximiser les ailiers + latéraux
-- Si primaire = Défense → maximiser les défenseurs
-- Si primaire = Passe → maximiser milieux + ailiers + attaquants (2-4-4 ou 2-5-3)
-- Si primaire = Gardien → un seul gardien suffit
-Les postes NON entraînables (gardien quand on n'entraîne pas Gardien, défenseurs quand on n'entraîne pas Défense) doivent être MINIMISÉS et remplis par des bouche-trous.
+La formation DOIT maximiser le nombre de joueurs en position entraînable pour le primaire ET le secondaire combinés.
+
+Rappel des postes entraînables par type :
+- Buteur → ATTAQUANTS uniquement (osmose faible pour les autres)
+- Construction → MILIEUX plein effet + AILIERS demi-effet (osmose faible pour les autres)
+- Ailier → AILIERS plein effet + LATÉRAUX demi-effet (osmose faible pour les autres)
+- Passe → MILIEUX + AILIERS + ATTAQUANTS (osmose faible pour les autres)
+- Défense → DÉFENSEURS (osmose faible pour les autres)
+- Gardien → GARDIEN uniquement
+
+Pour CHAQUE combo primaire + secondaire, optimiser la formation :
+- Construction + Passe → 2-5-3 (5 milieux/ailiers reçoivent Construction, 5+3=8 reçoivent Passe)
+- Construction + Buteur → 2-5-3 (5 milieux/ailiers Construction, 3 attaquants Buteur)
+- Buteur + Passe → 2-4-4 ou 2-5-3 (3-4 attaquants Buteur, milieux+ailiers+att reçoivent Passe)
+- Buteur + Construction → 2-5-3 (3 attaquants Buteur, 5 milieux/ailiers Construction)
+- Ailier + Passe → 2-5-3 (ailiers+latéraux Ailier, milieux+ailiers+att Passe)
+- Défense + Construction → 5-3-2 ou 4-5-1 (défenseurs Défense, milieux Construction)
+
+RÈGLE : minimiser les postes "morts" (qui ne reçoivent NI le primaire NI le secondaire). Gardien = toujours un poste mort sauf si on entraîne Gardien. Chaque défenseur est un poste mort sauf si on entraîne Défense.
 
 **PRIORITÉ 2 — Progresser les vrais prospects**
 Un vrai prospect = compétence principale avec marge de progression + compétences secondaires correctes (pas maxées bas).

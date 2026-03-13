@@ -2,6 +2,12 @@
 
 Toutes les modifications notables de **ai-trick** sont documentées ici.
 
+## [0.6.3] - 2026-03-13
+
+### Amélioré
+- **Terrain retourné** : gardien en haut, attaquants en bas (comme sur Hattrick)
+- **Prompt : table explicite des combos formation/entraînement** — Pour chaque combinaison primaire+secondaire, la formation optimale est précisée (ex: Construction+Passe → 2-5-3). Règle : minimiser les postes "morts" qui ne reçoivent ni le primaire ni le secondaire.
+
 ## [0.6.2] - 2026-03-13
 
 ### Amélioré

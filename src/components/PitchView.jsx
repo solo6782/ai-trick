@@ -94,10 +94,10 @@ export default function PitchView({ lineup, formation, subs }) {
   if (!lineup || lineup.length === 0) return null;
 
   const rows = [
-    getRowPositions(lineup, 3), // Attackers (top)
-    getRowPositions(lineup, 2), // Midfielders
+    getRowPositions(lineup, 0), // Goalkeeper (top)
     getRowPositions(lineup, 1), // Defenders
-    getRowPositions(lineup, 0), // Goalkeeper
+    getRowPositions(lineup, 2), // Midfielders
+    getRowPositions(lineup, 3), // Attackers (bottom)
   ];
 
   const compact = lineup.length > 9;
