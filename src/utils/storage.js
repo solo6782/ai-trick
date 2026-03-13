@@ -48,6 +48,14 @@ export async function loadMatchReports() {
   }
 }
 
+export async function deleteMatchReport(matchId) {
+  await fetch('/api/reports', {
+    method: 'DELETE',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ matchId })
+  });
+}
+
 // ── Settings ──
 
 export async function saveSetting(key, value) {

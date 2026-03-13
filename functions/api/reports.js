@@ -1,6 +1,6 @@
 const CORS = {
   'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
+  'Access-Control-Allow-Methods': 'GET, POST, DELETE, OPTIONS',
   'Access-Control-Allow-Headers': 'Content-Type',
   'Content-Type': 'application/json'
 };
@@ -48,6 +48,21 @@ export async function onRequestPost(context) {
          notes_detaillees = excluded.notes_detaillees,
          saved_at = datetime("now")`
     ).bind(matchId, date || '', rapport || '', compteRendu || '', notesDetaillees || '').run();
+
+    return new Response(JSON.stringify({ ok: true }), { headers: CORS });
+  } catch (err) {
+    return new Response(JSON.stringify({ error: err.message }), { status: 500, headers: CORS });
+  }
+}
+
+// DELETE /api/reports — Delete a match report
+export async function onRequestDelete(context) {
+  try {
+    const { matchId } = await context.request.json();
+
+    await context.env.DB.prepare(
+      'DELETE FROM match_reports WHERE match_id = ?'
+    ).bind(matchId).run();
 
     return new Response(JSON.stringify({ ok: true }), { headers: CORS });
   } catch (err) {

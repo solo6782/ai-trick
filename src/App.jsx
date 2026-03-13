@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { parseHRF } from './utils/hrfParser'
-import { loadHRFData, saveHRFData, loadMatchReports, saveMatchReport, loadSettings } from './utils/storage'
+import { loadHRFData, saveHRFData, loadMatchReports, saveMatchReport, deleteMatchReport, loadSettings } from './utils/storage'
 import PlayerTable from './components/PlayerTable'
 import PlayerDetail from './components/PlayerDetail'
 import ImportHRFModal from './components/ImportHRFModal'
@@ -8,6 +8,7 @@ import ImportReportModal from './components/ImportReportModal'
 import RecruitmentModal from './components/RecruitmentModal'
 import CompositionPanel from './components/CompositionPanel'
 import AIAlerts from './components/AIAlerts'
+import ReportsPage from './components/ReportsPage'
 import Settings from './components/Settings'
 
 export default function App() {
@@ -57,6 +58,18 @@ export default function App() {
     setShowImportReport(false)
   }
 
+  async function handleReportDelete(matchId) {
+    await deleteMatchReport(matchId)
+    const reports = await loadMatchReports()
+    setMatchReports(reports)
+  }
+
+  async function handleReportEdit(matchId, report) {
+    await saveMatchReport(matchId, report)
+    const reports = await loadMatchReports()
+    setMatchReports(reports)
+  }
+
   if (loading) {
     return (
       <div className="app">
@@ -97,6 +110,9 @@ export default function App() {
         <button className={`nav-tab ${page === 'dashboard' ? 'active' : ''}`} onClick={() => setPage('dashboard')}>
           Tableau de bord
         </button>
+        <button className={`nav-tab ${page === 'reports' ? 'active' : ''}`} onClick={() => setPage('reports')}>
+          Rapports ({Object.keys(matchReports).length})
+        </button>
         <button className={`nav-tab ${page === 'settings' ? 'active' : ''}`} onClick={() => setPage('settings')}>
           Paramètres
         </button>
@@ -126,6 +142,8 @@ export default function App() {
       )}
 
       {page === 'settings' && <Settings onApiKeyChange={setHasApiKey} />}
+
+      {page === 'reports' && <ReportsPage matchReports={matchReports} onDelete={handleReportDelete} onEdit={handleReportEdit} />}
 
       {showImportHRF && <ImportHRFModal onImport={handleHRFImport} onClose={() => setShowImportHRF(false)} />}
       {showImportReport && hrfData && <ImportReportModal players={hrfData.youthPlayers} existingReports={matchReports} onSave={handleReportSave} onClose={() => setShowImportReport(false)} />}
