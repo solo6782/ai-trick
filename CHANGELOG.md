@@ -2,6 +2,14 @@
 
 Toutes les modifications notables de **ai-trick** sont documentées ici.
 
+## [0.6.0] - 2026-03-13
+
+### Amélioré
+- **Prompt système refondu** : règles de composition avec 5 niveaux de priorité. L'IA ne mettra plus un ailier en gardien pour "révéler" une compétence inutile. Progression > Révélation. Les derniers matchs avant promotion sont protégés.
+- **Composition graphique** : affichage sur un terrain de football (style Hattrick) avec les joueurs positionnés par ligne, formation visible, remplaçants en dessous.
+- **Réponse structurée** : l'IA retourne un JSON parsé automatiquement — entraînements en blocs colorés, pitch graphique, justifications par joueur, résumé stratégique.
+- Fallback texte si le JSON n'est pas parsable.
+
 ## [0.5.0] - 2026-03-13
 
 ### Ajouté

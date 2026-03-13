@@ -1,6 +1,14 @@
 import { useState, useEffect } from 'react'
 
-const CHANGELOG = `## [0.5.0] - 2026-03-13
+const CHANGELOG = `## [0.6.0] - 2026-03-13
+
+### Amélioré
+- Prompt système refondu : 5 niveaux de priorité pour la composition. Progression > Révélation. Plus jamais un ailier en gardien.
+- Composition graphique : terrain de football avec joueurs positionnés par ligne
+- Réponse structurée : entraînements en blocs colorés, pitch, justifications, résumé
+- Fallback texte si JSON non parsable
+
+## [0.5.0] - 2026-03-13
 
 ### Ajouté
 - Tri sur toutes les colonnes du tableau (y compris GK, DEF, CON, AIL, PAS, BUT, CF)
