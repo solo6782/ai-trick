@@ -1,6 +1,13 @@
 import { useState, useEffect } from 'react'
 
-const CHANGELOG = `## [0.6.1] - 2026-03-13
+const CHANGELOG = `## [0.6.2] - 2026-03-13
+
+### Amélioré
+- Prompt : Triangle d'analyse (compétences + notes historiques + phrases coach/scout)
+- Joueur à 1★ depuis 16 matchs → ne plus le remettre à ce poste
+- Phrases du coach exploitées pour déterminer le vrai profil du joueur
+
+## [0.6.1] - 2026-03-13
 
 ### Amélioré
 - Prompt : évaluation profil complet. Buteur 7 + Passe 2 MAXÉ = bouche-trou, pas prospect.

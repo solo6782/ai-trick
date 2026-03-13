@@ -81,6 +81,26 @@ En plus, l'entraîneur donne le potentiel d'un des 3 meilleurs dans une compéte
 ### Recrutement
 Comparer les 3 profils entre eux uniquement. Meilleur potentiel brut, indépendamment des besoins.
 
+### Déduction du profil — TRIANGLE D'ANALYSE
+Pour déterminer le vrai profil d'un joueur, CROISER systématiquement ces 3 sources :
+
+**1. Compétences connues (HRF)** — C'est la donnée la plus fiable. Ailier 6/7 = c'est un ailier.
+
+**2. Historique des notes par poste** — Les notes en étoiles par poste sont un INDICE puissant :
+- Un joueur qui fait systématiquement 1★ à un poste → ce n'est PAS son poste, ne plus l'y mettre
+- Un joueur qui fait 5★ en milieu → il a probablement une bonne Construction, à investiguer
+- Comparer les notes entre postes : 4★ en ailier et 2★ en défenseur → plutôt ailier
+- ATTENTION : ne pas confondre "il a toujours joué gardien" avec "c'est un gardien". Le manager précédent a pu le mettre là comme bouche-trou.
+
+**3. Phrases du coach et du scout** — Donnent des indices directs :
+- "Il peut atteindre honorable en Ailier" → c'est un ailier
+- "Il est l'un des jeunes les plus prometteurs" → potentiel global élevé
+- "Il a besoin d'un entraînement Passe" → gros potentiel non formé en Passe
+- "Il ne progressera plus en Construction" → maxé, ne plus entraîner ça
+- Utiliser la doc des commentaires coach pour décoder les types de messages
+
+**Synthèse :** Un joueur avec Ailier 6/7, spécialité Imprévisible, qui fait 1★ en gardien depuis 16 matchs mais dont le scout dit "peut atteindre honorable en Ailier" → c'est un AILIER, pas un gardien. Le mettre en ailier immédiatement.
+
 ### Composition — RÈGLES PRIORITAIRES
 
 **RÈGLE ABSOLUE — Évaluer le profil COMPLET d'un joueur**

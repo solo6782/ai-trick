@@ -2,6 +2,14 @@
 
 Toutes les modifications notables de **ai-trick** sont documentées ici.
 
+## [0.6.2] - 2026-03-13
+
+### Amélioré
+- **Prompt : Triangle d'analyse** — L'IA croise maintenant 3 sources pour déterminer le profil d'un joueur : compétences HRF + historique des notes par poste + phrases du coach/scout.
+- Un joueur qui fait 1★ à un poste depuis 16 matchs ne sera plus remis à ce poste. Les notes historiques servent d'indice, pas de vérité.
+- Les phrases du coach ("peut atteindre honorable en Ailier", "ne progressera plus en Construction") sont prises en compte pour la déduction du profil.
+- Exemple explicite dans le prompt : Lanoy (Ailier 6/7, Imprévisible, 1★ en gardien) = ailier, pas gardien.
+
 ## [0.6.1] - 2026-03-13
 
 ### Amélioré
