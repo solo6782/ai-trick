@@ -75,6 +75,46 @@ export async function loadPredictions() {
   }
 }
 
+// ── Match History ──
+
+export async function saveMatchHistory(entries) {
+  await fetch('/api/history', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ entries })
+  });
+}
+
+export async function loadMatchHistory(playerId = null) {
+  try {
+    const url = playerId ? `/api/history?player_id=${playerId}` : '/api/history';
+    const res = await fetch(url);
+    return await res.json();
+  } catch {
+    return [];
+  }
+}
+
+// ── Player Match History ──
+
+export async function savePlayerHistory(records) {
+  await fetch('/api/history', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ records })
+  });
+}
+
+export async function loadPlayerHistory(playerId) {
+  try {
+    const url = playerId ? `/api/history?player_id=${playerId}` : '/api/history';
+    const res = await fetch(url);
+    return await res.json();
+  } catch {
+    return [];
+  }
+}
+
 // ── Settings ──
 
 export async function saveSetting(key, value) {

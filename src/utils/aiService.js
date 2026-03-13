@@ -1,8 +1,8 @@
 import { buildFullPrompt } from '../data/systemPrompt.js';
-import { loadApiKey, loadCustomNotes } from './storage.js';
+import { loadApiKey, loadCustomNotes, loadPlayerHistory } from './storage.js';
 import { getSkillLabel, getPositionLabel } from './hrfParser.js';
 
-function formatPlayerForAI(player) {
+function formatPlayerForAI(player, history) {
   const skills = Object.entries({
     'Gardien': player.skills.keeper, 'Défense': player.skills.defender,
     'Construction': player.skills.playmaker, 'Ailier': player.skills.winger,
@@ -18,12 +18,21 @@ function formatPlayerForAI(player) {
     ? `Dernier match: ${player.lastMatch.date}, poste=${getPositionLabel(player.lastMatch.positionCode)}, ${player.lastMatch.playedMinutes}min, note=${player.lastMatch.rating}★`
     : 'Aucun match récent';
 
+  // Format history
+  const playerHistory = (history || []).filter(h => h.player_id === player.id);
+  let histStr = '';
+  if (playerHistory.length > 0) {
+    histStr = 'Historique matchs:\n' + playerHistory.map(h =>
+      `  ${h.match_date} | ${getPositionLabel(h.position_code)} | ${h.played_minutes}min | ${h.rating}★`
+    ).join('\n') + '\n';
+  }
+
   const scouts = player.scoutComments.map(c => `  - ${c.text}`).join('\n');
 
   return `### ${player.name}
 Âge: ${player.age}a ${player.ageDays}j | Spécialité: ${player.specialtyLabel || 'Aucune'} | Promotion: ${player.isPromotable ? 'PRÊT' : `dans ${player.daysUntilPromotion}j`}
 Blessé: ${player.isInjured ? 'OUI' : 'Non'} | Cartons: ${player.cards} | Buts: ${player.careerGoals}
-Compétences:\n${skills}\n${lm}\nScout:\n${scouts || '  Aucun'}\n`;
+Compétences:\n${skills}\n${lm}\n${histStr}Scout:\n${scouts || '  Aucun'}\n`;
 }
 
 function formatReports(reports) {
@@ -46,12 +55,15 @@ export async function callAI(userMessage, hrfData, matchReports = {}) {
 
   let context = '';
   if (hrfData) {
+    // Load player match history
+    const history = await loadPlayerHistory();
+
     context += `## DONNÉES DE L'ÉQUIPE\n`;
     context += `Équipe: ${hrfData.team.youthTeamName} (${hrfData.team.teamName})\n`;
     context += `Saison: ${hrfData.team.season}, Journée: ${hrfData.team.matchRound}\n`;
     context += `Entraînement senior: ${hrfData.training.type} (intensité: ${hrfData.training.level}%, endurance: ${hrfData.training.staminaPart}%)\n\n`;
     context += `## EFFECTIF JUNIOR (${hrfData.youthPlayers.length} joueurs)\n\n`;
-    context += hrfData.youthPlayers.map(formatPlayerForAI).join('\n---\n');
+    context += hrfData.youthPlayers.map(p => formatPlayerForAI(p, history)).join('\n---\n');
     context += formatReports(matchReports);
   }
 

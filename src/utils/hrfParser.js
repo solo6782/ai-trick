@@ -146,3 +146,29 @@ export function getSkillColor(current, max) {
 }
 
 export { SKILL_LEVELS, SPECIALTY_MAP, POSITION_CODES };
+
+/**
+ * Extract player match history records from a parsed HRF.
+ * Returns an array of records ready for D1 insertion.
+ */
+export function extractMatchHistory(parsedHRF) {
+  const hrfDate = parsedHRF.team?.season ? `S${parsedHRF.team.season}-J${parsedHRF.team.matchRound}` : '';
+  const records = [];
+
+  for (const player of parsedHRF.youthPlayers) {
+    if (player.lastMatch.id && player.lastMatch.date) {
+      records.push({
+        playerId: player.id,
+        playerName: player.name,
+        matchId: player.lastMatch.id,
+        matchDate: player.lastMatch.date,
+        positionCode: player.lastMatch.positionCode,
+        playedMinutes: player.lastMatch.playedMinutes,
+        rating: player.lastMatch.rating,
+        hrfDate
+      });
+    }
+  }
+
+  return records;
+}

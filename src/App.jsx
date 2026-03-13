@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { parseHRF } from './utils/hrfParser'
-import { loadHRFData, saveHRFData, loadMatchReports, saveMatchReport, deleteMatchReport, loadSettings, loadPredictions, savePredictions } from './utils/storage'
+import { loadHRFData, saveHRFData, loadMatchReports, saveMatchReport, deleteMatchReport, loadSettings, loadPredictions, savePredictions, loadPlayerHistory } from './utils/storage'
 import { calculatePotentialScore } from './utils/scoreCalculator'
 import { askPredictions } from './utils/aiService'
 import PlayerTable from './components/PlayerTable'
@@ -25,6 +25,7 @@ export default function App() {
   const [showComposition, setShowComposition] = useState(false)
   const [predictions, setPredictions] = useState({})
   const [scores, setScores] = useState({})
+  const [playerHistory, setPlayerHistory] = useState([])
   const [analyzing, setAnalyzing] = useState(false)
   const [loading, setLoading] = useState(true)
 
@@ -39,15 +40,17 @@ export default function App() {
   useEffect(() => {
     async function init() {
       try {
-        const [hrf, reports, settings, preds] = await Promise.all([
+        const [hrf, reports, settings, preds, history] = await Promise.all([
           loadHRFData(),
           loadMatchReports(),
           loadSettings(),
-          loadPredictions()
+          loadPredictions(),
+          loadPlayerHistory()
         ]);
         if (hrf) { setHrfData(hrf); recalcScores(hrf.youthPlayers); }
         if (reports) setMatchReports(reports)
         if (preds) setPredictions(preds)
+        if (history) setPlayerHistory(history)
         setHasApiKey(!!settings?.api_key)
       } catch (e) {
         console.error('Init error:', e)
@@ -63,6 +66,9 @@ export default function App() {
     await saveHRFData(parsed)
     setHrfData(parsed)
     recalcScores(parsed.youthPlayers)
+    // Reload history (ImportHRFModal already saved history records)
+    const history = await loadPlayerHistory()
+    setPlayerHistory(history)
     setShowImportHRF(false)
   }
 
@@ -138,6 +144,10 @@ export default function App() {
           <button className="btn btn-primary" onClick={() => setShowImportHRF(true)}>
             📂 Importer HRF
           </button>
+          <button className="btn" onClick={() => setShowImportHistory(true)}
+            style={{ borderColor: 'var(--accent-green)', color: 'var(--accent-green)' }}>
+            📚 Historique HRF
+          </button>
           <button className="btn btn-blue" onClick={() => setShowImportReport(true)} disabled={!hrfData}>
             📋 Rapport
           </button>
@@ -194,10 +204,11 @@ export default function App() {
       {page === 'reports' && <ReportsPage matchReports={matchReports} onDelete={handleReportDelete} onEdit={handleReportEdit} />}
 
       {showImportHRF && <ImportHRFModal onImport={handleHRFImport} onClose={() => setShowImportHRF(false)} />}
+      {showImportHistory && <ImportHistoryModal onClose={() => setShowImportHistory(false)} onDone={() => {}} />}
       {showImportReport && hrfData && <ImportReportModal players={hrfData.youthPlayers} existingReports={matchReports} onSave={handleReportSave} onClose={() => setShowImportReport(false)} />}
       {showRecruitment && <RecruitmentModal hrfData={hrfData} onClose={() => setShowRecruitment(false)} />}
       {showComposition && <CompositionPanel hrfData={hrfData} matchReports={matchReports} onClose={() => setShowComposition(false)} />}
-      {selectedPlayer && <PlayerDetail player={selectedPlayer} matchReports={matchReports} predictions={predictions} score={scores[selectedPlayer.id]} onClose={() => setSelectedPlayer(null)} />}
+      {selectedPlayer && <PlayerDetail player={selectedPlayer} matchReports={matchReports} predictions={predictions} score={scores[selectedPlayer.id]} playerHistory={playerHistory} onClose={() => setSelectedPlayer(null)} />}
     </div>
   )
 }

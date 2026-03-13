@@ -50,8 +50,9 @@ function SkillBar({ name, skill, prediction, color }) {
   )
 }
 
-export default function PlayerDetail({ player, matchReports, predictions, score, onClose }) {
+export default function PlayerDetail({ player, matchReports, predictions, score, playerHistory, onClose }) {
   const pred = predictions?.[player.id]?.skills || {};
+  const history = (playerHistory || []).filter(h => h.player_id === player.id);
 
   return (
     <div className="detail-overlay" onClick={onClose}>
@@ -106,6 +107,36 @@ export default function PlayerDetail({ player, matchReports, predictions, score,
           <div className="detail-section">
             <h3>Commentaires du recruteur</h3>
             {player.scoutComments.map((c, i) => <div key={i} className="scout-comment">{c.text}</div>)}
+          </div>
+        )}
+
+        {history.length > 0 && (
+          <div className="detail-section">
+            <h3>Historique des matchs ({history.length})</h3>
+            <div style={{ overflowX: 'auto' }}>
+              <table style={{ width: '100%', fontSize: '0.78rem' }}>
+                <thead>
+                  <tr>
+                    <th style={{ textAlign: 'left', padding: '6px 8px' }}>Date</th>
+                    <th style={{ textAlign: 'left', padding: '6px 8px' }}>Poste</th>
+                    <th style={{ textAlign: 'center', padding: '6px 8px' }}>Min</th>
+                    <th style={{ textAlign: 'center', padding: '6px 8px' }}>★</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {history.map((h, i) => (
+                    <tr key={i} style={{ borderBottom: '1px solid var(--border)' }}>
+                      <td style={{ padding: '6px 8px', color: 'var(--text-secondary)' }}>
+                        {h.match_date ? new Date(h.match_date).toLocaleDateString('fr-FR') : '—'}
+                      </td>
+                      <td style={{ padding: '6px 8px' }}>{getPositionLabel(h.position_code)}</td>
+                      <td style={{ padding: '6px 8px', textAlign: 'center', fontFamily: 'var(--font-mono)' }}>{h.played_minutes}</td>
+                      <td style={{ padding: '6px 8px', textAlign: 'center', color: 'var(--accent-orange)', fontFamily: 'var(--font-mono)' }}>{h.rating}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
           </div>
         )}
 
