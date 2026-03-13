@@ -144,10 +144,6 @@ export default function App() {
           <button className="btn btn-primary" onClick={() => setShowImportHRF(true)}>
             📂 Importer HRF
           </button>
-          <button className="btn" onClick={() => setShowImportHistory(true)}
-            style={{ borderColor: 'var(--accent-green)', color: 'var(--accent-green)' }}>
-            📚 Historique HRF
-          </button>
           <button className="btn btn-blue" onClick={() => setShowImportReport(true)} disabled={!hrfData}>
             📋 Rapport
           </button>
@@ -204,7 +200,6 @@ export default function App() {
       {page === 'reports' && <ReportsPage matchReports={matchReports} onDelete={handleReportDelete} onEdit={handleReportEdit} />}
 
       {showImportHRF && <ImportHRFModal onImport={handleHRFImport} onClose={() => setShowImportHRF(false)} />}
-      {showImportHistory && <ImportHistoryModal onClose={() => setShowImportHistory(false)} onDone={() => {}} />}
       {showImportReport && hrfData && <ImportReportModal players={hrfData.youthPlayers} existingReports={matchReports} onSave={handleReportSave} onClose={() => setShowImportReport(false)} />}
       {showRecruitment && <RecruitmentModal hrfData={hrfData} onClose={() => setShowRecruitment(false)} />}
       {showComposition && <CompositionPanel hrfData={hrfData} matchReports={matchReports} onClose={() => setShowComposition(false)} />}
