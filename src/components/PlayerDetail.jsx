@@ -1,4 +1,5 @@
 import { getSkillLabel, getPositionLabel, formatAge } from '../utils/hrfParser'
+import { getScoreColor } from '../utils/scoreCalculator'
 
 const SKILL_KEYS = [
   { key: 'keeper', name: 'Gardien', color: '#22d3ee' },
@@ -10,24 +11,36 @@ const SKILL_KEYS = [
   { key: 'setPieces', name: 'Coup franc', color: '#94a3b8' }
 ]
 
-function SkillBar({ name, skill, color }) {
+function SkillBar({ name, skill, prediction, color }) {
   const MAX = 10
-  const curPct = skill.current !== null ? (skill.current / MAX) * 100 : 0
-  const maxPct = skill.max !== null ? (skill.max / MAX) * 100 : 0
-  const curLabel = skill.current !== null ? `${skill.current} (${getSkillLabel(skill.current)})` : '?'
-  const maxLabel = skill.max !== null ? `${skill.max} (${getSkillLabel(skill.max)})` : '?'
+  const pred = prediction || {}
+
+  // Merge HRF + prediction
+  const showCur = skill.current !== null ? skill.current : (pred.current ?? null)
+  const showMax = skill.max !== null ? skill.max : (pred.max ?? null)
+  const curIsPred = skill.current === null && pred.current != null
+  const maxIsPred = skill.max === null && pred.max != null
+
+  const curPct = showCur !== null ? (showCur / MAX) * 100 : 0
+  const maxPct = showMax !== null ? (showMax / MAX) * 100 : 0
+
+  const curLabel = showCur !== null ? `${curIsPred ? '~' : ''}${showCur} (${getSkillLabel(showCur)})` : '?'
+  const maxLabel = showMax !== null ? `${maxIsPred ? '~' : ''}${showMax} (${getSkillLabel(showMax)})` : '?'
+
   let status = ''
   if (skill.maxReached) status = ' ✓ MAXÉ'
-  else if (skill.current !== null && skill.max !== null) {
-    const gap = skill.max - skill.current
+  else if (showCur !== null && showMax !== null) {
+    const gap = showMax - showCur
     if (gap > 0) status = ` → +${gap}`
   }
+
+  const confidence = (curIsPred || maxIsPred) ? ` (IA: ${pred.confidence || '?'})` : ''
 
   return (
     <div className="skill-bar-group">
       <div className="skill-bar-label">
-        <span className="name" style={{ color: skill.maxReached ? 'var(--skill-maxed)' : 'var(--text-primary)' }}>{name}{status}</span>
-        <span className="values">{curLabel} / {maxLabel}</span>
+        <span className="name" style={{ color: skill.maxReached ? 'var(--skill-maxed)' : 'var(--text-primary)' }}>{name}{status}{confidence}</span>
+        <span className="values" style={{ color: (curIsPred || maxIsPred) ? 'var(--accent-cyan)' : 'var(--text-secondary)' }}>{curLabel} / {maxLabel}</span>
       </div>
       <div className="skill-bar-track">
         {skill.current !== null && <div className="skill-bar-current" style={{ width: `${curPct}%`, background: skill.maxReached ? 'var(--skill-maxed)' : color }} />}
@@ -37,14 +50,23 @@ function SkillBar({ name, skill, color }) {
   )
 }
 
-export default function PlayerDetail({ player, matchReports, onClose }) {
+export default function PlayerDetail({ player, matchReports, predictions, score, onClose }) {
+  const pred = predictions?.[player.id]?.skills || {};
+
   return (
     <div className="detail-overlay" onClick={onClose}>
       <div className="detail-panel" onClick={e => e.stopPropagation()}>
         <div className="detail-header">
           <div>
             <h2>{player.name}</h2>
-            {player.specialtyLabel && <span className="tag tag-specialty" style={{ marginTop: 4 }}>{player.specialtyLabel}</span>}
+            <div style={{ display: 'flex', gap: 8, marginTop: 6, alignItems: 'center' }}>
+              {player.specialtyLabel && <span className="tag tag-specialty">{player.specialtyLabel}</span>}
+              {score !== undefined && (
+                <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.85rem', fontWeight: 700, color: getScoreColor(score) }}>
+                  Potentiel : {score}/100
+                </span>
+              )}
+            </div>
           </div>
           <button className="close-btn" onClick={onClose}>✕</button>
         </div>
@@ -60,7 +82,12 @@ export default function PlayerDetail({ player, matchReports, onClose }) {
 
         <div className="detail-section">
           <h3>Compétences</h3>
-          {SKILL_KEYS.map(({ key, name, color }) => <SkillBar key={key} name={name} skill={player.skills[key]} color={color} />)}
+          {SKILL_KEYS.map(({ key, name, color }) => <SkillBar key={key} name={name} skill={player.skills[key]} prediction={pred[key]} color={color} />)}
+          {predictions?.[player.id]?.updatedAt && (
+            <div style={{ fontSize: '0.72rem', color: 'var(--text-muted)', marginTop: 8 }}>
+              Prédictions IA du {new Date(predictions[player.id].updatedAt).toLocaleString('fr-FR')}
+            </div>
+          )}
         </div>
 
         {player.lastMatch.date && (

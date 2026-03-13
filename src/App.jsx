@@ -1,6 +1,8 @@
 import { useState, useEffect } from 'react'
 import { parseHRF } from './utils/hrfParser'
-import { loadHRFData, saveHRFData, loadMatchReports, saveMatchReport, deleteMatchReport, loadSettings } from './utils/storage'
+import { loadHRFData, saveHRFData, loadMatchReports, saveMatchReport, deleteMatchReport, loadSettings, loadPredictions, savePredictions } from './utils/storage'
+import { calculatePotentialScore } from './utils/scoreCalculator'
+import { askPredictions } from './utils/aiService'
 import PlayerTable from './components/PlayerTable'
 import PlayerDetail from './components/PlayerDetail'
 import ImportHRFModal from './components/ImportHRFModal'
@@ -21,19 +23,31 @@ export default function App() {
   const [showImportReport, setShowImportReport] = useState(false)
   const [showRecruitment, setShowRecruitment] = useState(false)
   const [showComposition, setShowComposition] = useState(false)
+  const [predictions, setPredictions] = useState({})
+  const [scores, setScores] = useState({})
+  const [analyzing, setAnalyzing] = useState(false)
   const [loading, setLoading] = useState(true)
+
+  // Calculate scores whenever hrfData changes
+  function recalcScores(players) {
+    const s = {};
+    for (const p of players) s[p.id] = calculatePotentialScore(p);
+    setScores(s);
+  }
 
   // Load data from D1 on mount
   useEffect(() => {
     async function init() {
       try {
-        const [hrf, reports, settings] = await Promise.all([
+        const [hrf, reports, settings, preds] = await Promise.all([
           loadHRFData(),
           loadMatchReports(),
-          loadSettings()
+          loadSettings(),
+          loadPredictions()
         ]);
-        if (hrf) setHrfData(hrf)
+        if (hrf) { setHrfData(hrf); recalcScores(hrf.youthPlayers); }
         if (reports) setMatchReports(reports)
+        if (preds) setPredictions(preds)
         setHasApiKey(!!settings?.api_key)
       } catch (e) {
         console.error('Init error:', e)
@@ -48,6 +62,7 @@ export default function App() {
     const parsed = parseHRF(text)
     await saveHRFData(parsed)
     setHrfData(parsed)
+    recalcScores(parsed.youthPlayers)
     setShowImportHRF(false)
   }
 
@@ -68,6 +83,35 @@ export default function App() {
     await saveMatchReport(matchId, report)
     const reports = await loadMatchReports()
     setMatchReports(reports)
+  }
+
+  async function handleAnalyze() {
+    setAnalyzing(true)
+    try {
+      const rawPreds = await askPredictions(hrfData, matchReports)
+      // Transform AI response into storage format
+      const toSave = rawPreds.map(p => ({
+        id: p.id,
+        skills: {
+          keeper: p.keeper || {},
+          defender: p.defender || {},
+          playmaker: p.playmaker || {},
+          winger: p.winger || {},
+          passing: p.passing || {},
+          scorer: p.scorer || {},
+          setPieces: p.setPieces || {}
+        },
+        potentialScore: scores[p.id] || 0
+      }))
+      await savePredictions(toSave)
+      const preds = await loadPredictions()
+      setPredictions(preds)
+    } catch (e) {
+      console.error('Analyze error:', e)
+      alert('Erreur d\'analyse : ' + e.message)
+    } finally {
+      setAnalyzing(false)
+    }
   }
 
   if (loading) {
@@ -103,6 +147,10 @@ export default function App() {
           <button className="btn btn-purple" onClick={() => setShowComposition(true)} disabled={!hrfData || !hasApiKey}>
             📝 Composition
           </button>
+          <button className="btn" onClick={handleAnalyze} disabled={!hrfData || !hasApiKey || analyzing}
+            style={{ borderColor: 'var(--accent-cyan)', color: 'var(--accent-cyan)' }}>
+            {analyzing ? <><span className="loading-spinner" style={{ borderTopColor: 'var(--accent-cyan)' }} /> Analyse...</> : '🧠 Analyser'}
+          </button>
         </div>
       </header>
 
@@ -135,7 +183,7 @@ export default function App() {
                 <h3>🏋️ Entraînement senior : {hrfData.training.type} — Intensité {hrfData.training.level}% — Endurance {hrfData.training.staminaPart}%</h3>
               </div>
 
-              <PlayerTable players={hrfData.youthPlayers} onSelectPlayer={setSelectedPlayer} />
+              <PlayerTable players={hrfData.youthPlayers} predictions={predictions} scores={scores} onSelectPlayer={setSelectedPlayer} />
             </>
           )}
         </>
@@ -149,7 +197,7 @@ export default function App() {
       {showImportReport && hrfData && <ImportReportModal players={hrfData.youthPlayers} existingReports={matchReports} onSave={handleReportSave} onClose={() => setShowImportReport(false)} />}
       {showRecruitment && <RecruitmentModal hrfData={hrfData} onClose={() => setShowRecruitment(false)} />}
       {showComposition && <CompositionPanel hrfData={hrfData} matchReports={matchReports} onClose={() => setShowComposition(false)} />}
-      {selectedPlayer && <PlayerDetail player={selectedPlayer} matchReports={matchReports} onClose={() => setSelectedPlayer(null)} />}
+      {selectedPlayer && <PlayerDetail player={selectedPlayer} matchReports={matchReports} predictions={predictions} score={scores[selectedPlayer.id]} onClose={() => setSelectedPlayer(null)} />}
     </div>
   )
 }

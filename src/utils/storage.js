@@ -56,6 +56,25 @@ export async function deleteMatchReport(matchId) {
   });
 }
 
+// ── AI Predictions ──
+
+export async function savePredictions(players) {
+  await fetch('/api/predictions', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ players })
+  });
+}
+
+export async function loadPredictions() {
+  try {
+    const res = await fetch('/api/predictions');
+    return await res.json();
+  } catch {
+    return {};
+  }
+}
+
 // ── Settings ──
 
 export async function saveSetting(key, value) {

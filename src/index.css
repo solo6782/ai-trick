@@ -87,6 +87,7 @@ td { padding: 8px 12px; vertical-align: middle; }
 .skill-cell.current-only { color: var(--skill-current-only); }
 .skill-cell.max-only { color: var(--skill-max-only); }
 .skill-cell.unknown { color: var(--skill-unknown); }
+.skill-cell.predicted { color: var(--accent-cyan); font-style: italic; opacity: 0.8; }
 
 .tag { display: inline-block; padding: 2px 8px; border-radius: 99px; font-size: 0.7rem; font-weight: 600; }
 .tag-specialty { background: var(--accent-purple-dim); color: var(--accent-purple); border: 1px solid var(--accent-purple); }

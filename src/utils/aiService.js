@@ -102,3 +102,50 @@ export async function askDismissals(hrfData, matchReports) {
 Identifie les candidats au licenciement, du moins utile au plus utile. Justifie.
 JAMAIS licencier un joueur au potentiel largement inconnu.`, hrfData, matchReports);
 }
+
+export async function askPredictions(hrfData, matchReports) {
+  const playerIds = hrfData.youthPlayers.map(p => p.id);
+  const response = await callAI(
+    `Analyse chaque joueur et estime les compétences INCONNUES.
+
+Pour chaque joueur, déduis les niveaux probables à partir de :
+- Les notes en étoiles des matchs (un joueur à 5★ en milieu a probablement une bonne Construction)
+- Les commentaires du scout (types de commentaires = fourchettes de niveau)
+- Les notes de secteur des comptes-rendus
+- Les événements de match (occasions créées, buts, etc.)
+- Le poste occupé et la note obtenue
+- Les compétences déjà connues (cohérence du profil)
+
+Réponds UNIQUEMENT avec un bloc JSON valide, sans texte avant ni après.
+Format exact :
+[
+  {
+    "id": "PLAYER_ID",
+    "keeper": {"current": null ou 0-18, "max": null ou 0-18, "confidence": "low/medium/high"},
+    "defender": {"current": null, "max": null, "confidence": "low"},
+    "playmaker": {"current": null, "max": null, "confidence": "low"},
+    "winger": {"current": null, "max": null, "confidence": "low"},
+    "passing": {"current": null, "max": null, "confidence": "low"},
+    "scorer": {"current": null, "max": null, "confidence": "low"},
+    "setPieces": {"current": null, "max": null, "confidence": "low"}
+  }
+]
+
+Règles :
+- Ne remplis "current" et "max" QUE pour les compétences qui sont INCONNUES dans les données HRF
+- Pour les compétences déjà connues, mets null (on garde la valeur HRF)
+- "confidence" indique ton niveau de certitude : "high" si forte évidence, "medium" si probable, "low" si spéculatif
+- Si tu n'as aucune base pour estimer, mets null
+- Sois conservateur : mieux vaut null qu'une mauvaise prédiction
+
+IDs des joueurs : ${playerIds.join(', ')}`, hrfData, matchReports);
+
+  // Parse JSON from AI response
+  try {
+    const cleaned = response.replace(/```json\s*/g, '').replace(/```\s*/g, '').trim();
+    return JSON.parse(cleaned);
+  } catch (e) {
+    console.error('Failed to parse AI predictions:', e, response);
+    throw new Error('L\'IA n\'a pas retourné un format JSON valide. Réessaie.');
+  }
+}
