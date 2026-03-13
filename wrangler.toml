@@ -5,4 +5,4 @@ pages_build_output_dir = "dist"
 [[d1_databases]]
 binding = "DB"
 database_name = "ai-trick-db"
-database_id = "" # À remplir après: wrangler d1 create ai-trick-db
+database_id = "5978bdd8-c119-4b65-8aba-715c6eea1835"
