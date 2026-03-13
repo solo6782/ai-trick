@@ -2,6 +2,16 @@
 
 Toutes les modifications notables de **ai-trick** sont documentées ici.
 
+## [0.4.3] - 2026-03-13
+
+### Corrigé
+- **Tri chronologique** : les rapports et l'historique des matchs sont maintenant triés du plus récent au plus ancien
+- **Import rapport** : plus de `custom_` comme ID — un champ de saisie manuelle de l'ID du match est disponible
+
+### Amélioré
+- **Historique joueur** : les phrases du rapport coach apparaissent directement sous le match concerné (au lieu d'une section séparée)
+- **Import rapport** : deux modes (sélection d'un match connu ou saisie manuelle ID + date)
+
 ## [0.4.2] - 2026-03-13
 
 ### Corrigé

@@ -1,4 +1,4 @@
-import { getSkillLabel, getPositionLabel, formatAge, formatDateFR } from '../utils/hrfParser'
+import { getSkillLabel, getPositionLabel, formatAge, formatDateFR, parseDate } from '../utils/hrfParser'
 import { getScoreColor } from '../utils/scoreCalculator'
 
 const SKILL_KEYS = [
@@ -110,76 +110,60 @@ export default function PlayerDetail({ player, matchReports, predictions, score,
           </div>
         )}
 
-        {history.length > 0 && (
-          <div className="detail-section">
-            <h3>Historique des matchs ({history.length})</h3>
-            <div style={{ overflowX: 'auto' }}>
-              <table style={{ width: '100%', fontSize: '0.78rem' }}>
-                <thead>
-                  <tr>
-                    <th style={{ textAlign: 'left', padding: '6px 8px' }}>Date</th>
-                    <th style={{ textAlign: 'left', padding: '6px 8px' }}>Poste</th>
-                    <th style={{ textAlign: 'center', padding: '6px 8px' }}>Min</th>
-                    <th style={{ textAlign: 'center', padding: '6px 8px' }}>★</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {history.map((h, i) => (
-                    <tr key={i} style={{ borderBottom: '1px solid var(--border)' }}>
-                      <td style={{ padding: '6px 8px', color: 'var(--text-secondary)' }}>
-                        {h.match_date ? formatDateFR(h.match_date) : '—'}
-                      </td>
-                      <td style={{ padding: '6px 8px' }}>{getPositionLabel(h.position_code)}</td>
-                      <td style={{ padding: '6px 8px', textAlign: 'center', fontFamily: 'var(--font-mono)' }}>{h.played_minutes}</td>
-                      <td style={{ padding: '6px 8px', textAlign: 'center', color: 'var(--accent-orange)', fontFamily: 'var(--font-mono)' }}>{h.rating}</td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          </div>
-        )}
-
-        {Object.keys(matchReports).length > 0 && (() => {
-          // Extract only sentences mentioning this player from coach reports
-          const name = player.name;
-          const firstName = player.firstName;
-          const lastName = player.lastName;
-          const nameVariants = [name, firstName, lastName].filter(n => n && n.length > 2);
-
-          const relevantSentences = [];
+        {history.length > 0 && (() => {
+          // Build a map of match_id → coach sentences for this player
+          const nameVariants = [player.name, player.firstName, player.lastName].filter(n => n && n.length > 2);
+          const coachByMatch = {};
 
           for (const [id, r] of Object.entries(matchReports)) {
             if (!r.rapport) continue;
-            // Split rapport into sentences (split on period followed by uppercase or end)
             const sentences = r.rapport.split(/(?<=\.)\s*(?=[A-ZÀ-ÿ])/).map(s => s.trim()).filter(Boolean);
             const matching = sentences.filter(s =>
               nameVariants.some(n => s.toLowerCase().includes(n.toLowerCase()))
             );
-            if (matching.length > 0) {
-              relevantSentences.push({
-                matchId: id,
-                date: r.date,
-                sentences: matching
-              });
-            }
+            if (matching.length > 0) coachByMatch[id] = matching;
           }
 
-          if (relevantSentences.length === 0) return null;
+          // Sort history: most recent first
+          const sorted = [...history].sort((a, b) => {
+            const da = parseDate(a.match_date) || new Date(0);
+            const db = parseDate(b.match_date) || new Date(0);
+            return db.getTime() - da.getTime();
+          });
 
           return (
             <div className="detail-section">
-              <h3>Rapports coach ({relevantSentences.length})</h3>
-              {relevantSentences.map((entry, i) => (
-                <div key={i} style={{ marginBottom: 12 }}>
-                  <div style={{ fontSize: '0.78rem', color: 'var(--text-muted)', marginBottom: 4 }}>
-                    {entry.date ? formatDateFR(entry.date) : `Match ${entry.matchId}`}
+              <h3>Historique des matchs ({sorted.length})</h3>
+              {sorted.map((h, i) => {
+                const phrases = coachByMatch[h.match_id] || [];
+                return (
+                  <div key={i} style={{ marginBottom: phrases.length > 0 ? 12 : 0 }}>
+                    <div style={{
+                      display: 'flex', gap: 16, padding: '6px 0',
+                      borderBottom: phrases.length > 0 ? 'none' : '1px solid var(--border)',
+                      fontSize: '0.78rem'
+                    }}>
+                      <span style={{ minWidth: 110, color: 'var(--text-secondary)' }}>
+                        {h.match_date ? formatDateFR(h.match_date) : '—'}
+                      </span>
+                      <span style={{ minWidth: 140 }}>{getPositionLabel(h.position_code)}</span>
+                      <span style={{ minWidth: 40, textAlign: 'center', fontFamily: 'var(--font-mono)' }}>{h.played_minutes}</span>
+                      <span style={{ minWidth: 30, textAlign: 'center', color: 'var(--accent-orange)', fontFamily: 'var(--font-mono)' }}>{h.rating}★</span>
+                    </div>
+                    {phrases.length > 0 && (
+                      <div style={{ paddingBottom: 8, borderBottom: '1px solid var(--border)' }}>
+                        {phrases.map((s, j) => (
+                          <div key={j} className="scout-comment" style={{
+                            borderLeftColor: 'var(--accent-green)',
+                            marginTop: 4,
+                            fontSize: '0.78rem'
+                          }}>{s}</div>
+                        ))}
+                      </div>
+                    )}
                   </div>
-                  {entry.sentences.map((s, j) => (
-                    <div key={j} className="scout-comment" style={{ borderLeftColor: 'var(--accent-green)' }}>{s}</div>
-                  ))}
-                </div>
-              ))}
+                );
+              })}
             </div>
           );
         })()}

@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { formatDateFR } from '../utils/hrfParser'
+import { formatDateFR, parseDate } from '../utils/hrfParser'
 
 export default function ReportsPage({ matchReports, onDelete, onEdit }) {
   const [expandedId, setExpandedId] = useState(null)
@@ -7,8 +7,9 @@ export default function ReportsPage({ matchReports, onDelete, onEdit }) {
   const [editData, setEditData] = useState({})
 
   const entries = Object.entries(matchReports).sort((a, b) => {
-    const da = a[1].date || '', db = b[1].date || ''
-    return db.localeCompare(da)
+    const da = parseDate(a[1].date) || new Date(0)
+    const db = parseDate(b[1].date) || new Date(0)
+    return db.getTime() - da.getTime()
   })
 
   function handleEdit(id, report) {

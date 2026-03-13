@@ -1,6 +1,16 @@
 import { useState, useEffect } from 'react'
 
-const CHANGELOG = `## [0.4.2] - 2026-03-13
+const CHANGELOG = `## [0.4.3] - 2026-03-13
+
+### Corrigé
+- Tri chronologique des rapports et de l'historique (plus récent en premier)
+- Import rapport : plus de custom_ comme ID, champ de saisie manuelle disponible
+
+### Amélioré
+- Historique joueur : phrases du rapport coach sous le match concerné
+- Import rapport : deux modes (sélection ou saisie manuelle ID + date)
+
+## [0.4.2] - 2026-03-13
 
 ### Corrigé
 - Dates au format européen (DD-MM-YYYY) correctement interprétées
