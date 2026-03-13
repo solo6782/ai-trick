@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react'
 import { loadSettings, saveApiKey, saveCustomNotes } from '../utils/storage'
+import { VERSION } from '../version'
 
 export default function Settings({ onApiKeyChange }) {
   const [apiKey, setApiKey] = useState('')
@@ -66,7 +67,7 @@ export default function Settings({ onApiKeyChange }) {
       <div style={{ marginTop: 32, padding: 20, borderTop: '1px solid var(--border)' }}>
         <h3 style={{ fontSize: '0.85rem', color: 'var(--text-muted)', marginBottom: 12 }}>À propos</h3>
         <p style={{ fontSize: '0.82rem', color: 'var(--text-secondary)', lineHeight: 1.7 }}>
-          <strong>ai-trick</strong> — Outil d'aide à la gestion d'équipe junior Hattrick, propulsé par l'IA.<br />
+          <strong>ai-trick</strong> v{VERSION} — Outil d'aide à la gestion d'équipe junior Hattrick, propulsé par l'IA.<br />
           Modèle : <span style={{ fontFamily: 'var(--font-mono)' }}>claude-sonnet-4-20250514</span><br />
           Stockage : Cloudflare D1 (base de données persistante).<br />
         </p>

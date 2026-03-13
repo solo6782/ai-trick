@@ -141,25 +141,43 @@ export default function PlayerDetail({ player, matchReports, predictions, score,
         )}
 
         {Object.keys(matchReports).length > 0 && (() => {
-          // Filter reports that mention this player by name
-          const playerNames = [player.name, player.firstName, player.lastName].filter(n => n && n.length > 2);
-          const relevantReports = Object.entries(matchReports).filter(([id, r]) => {
-            const allText = [r.rapport, r.compteRendu, r.notesDetaillees].join(' ');
-            return playerNames.some(name => allText.toLowerCase().includes(name.toLowerCase()));
-          });
+          // Extract only sentences mentioning this player from coach reports
+          const name = player.name;
+          const firstName = player.firstName;
+          const lastName = player.lastName;
+          const nameVariants = [name, firstName, lastName].filter(n => n && n.length > 2);
 
-          if (relevantReports.length === 0) return null;
+          const relevantSentences = [];
+
+          for (const [id, r] of Object.entries(matchReports)) {
+            if (!r.rapport) continue;
+            // Split rapport into sentences (split on period followed by uppercase or end)
+            const sentences = r.rapport.split(/(?<=\.)\s*(?=[A-ZÀ-ÿ])/).map(s => s.trim()).filter(Boolean);
+            const matching = sentences.filter(s =>
+              nameVariants.some(n => s.toLowerCase().includes(n.toLowerCase()))
+            );
+            if (matching.length > 0) {
+              relevantSentences.push({
+                matchId: id,
+                date: r.date,
+                sentences: matching
+              });
+            }
+          }
+
+          if (relevantSentences.length === 0) return null;
 
           return (
             <div className="detail-section">
-              <h3>Rapports mentionnant {player.firstName} ({relevantReports.length})</h3>
-              {relevantReports.map(([id, r]) => (
-                <div key={id} style={{ marginBottom: 12 }}>
+              <h3>Rapports coach ({relevantSentences.length})</h3>
+              {relevantSentences.map((entry, i) => (
+                <div key={i} style={{ marginBottom: 12 }}>
                   <div style={{ fontSize: '0.78rem', color: 'var(--text-muted)', marginBottom: 4 }}>
-                    Match {id} — {r.date ? new Date(r.date).toLocaleDateString('fr-FR') : ''}
+                    {entry.date ? new Date(entry.date).toLocaleDateString('fr-FR') : `Match ${entry.matchId}`}
                   </div>
-                  {r.rapport && <div className="scout-comment" style={{ borderLeftColor: 'var(--accent-green)' }}>{r.rapport}</div>}
-                  {r.compteRendu && <div className="scout-comment" style={{ borderLeftColor: 'var(--accent-orange)' }}>{r.compteRendu}</div>}
+                  {entry.sentences.map((s, j) => (
+                    <div key={j} className="scout-comment" style={{ borderLeftColor: 'var(--accent-green)' }}>{s}</div>
+                  ))}
                 </div>
               ))}
             </div>

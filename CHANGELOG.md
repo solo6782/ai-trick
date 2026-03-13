@@ -2,6 +2,15 @@
 
 Toutes les modifications notables de **ai-trick** sont documentées ici.
 
+## [0.4.1] - 2026-03-13
+
+### Corrigé
+- **Rapports dans fiche joueur** : n'affiche plus que les phrases du rapport coach mentionnant le joueur (plus de compte-rendu ni de rapport complet)
+
+### Ajouté
+- **Numéro de version** affiché dans le header (à côté du logo) et dans la page Paramètres
+- Fichier `src/version.js` centralisant le numéro de version
+
 ## [0.4.0] - 2026-03-13
 
 ### Corrigé

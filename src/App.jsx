@@ -3,6 +3,7 @@ import { parseHRF } from './utils/hrfParser'
 import { loadHRFData, saveHRFData, loadMatchReports, saveMatchReport, deleteMatchReport, loadSettings, loadPredictions, savePredictions, loadPlayerHistory } from './utils/storage'
 import { calculatePotentialScore } from './utils/scoreCalculator'
 import { askPredictions } from './utils/aiService'
+import { VERSION } from './version'
 import PlayerTable from './components/PlayerTable'
 import PlayerDetail from './components/PlayerDetail'
 import ImportHRFModal from './components/ImportHRFModal'
@@ -136,6 +137,7 @@ export default function App() {
       <header className="header">
         <div className="header-title">
           <h1>ai-trick</h1>
+          <span style={{ fontSize: '0.7rem', color: 'var(--text-muted)', fontFamily: 'var(--font-mono)' }}>v{VERSION}</span>
           <span className="subtitle">
             {hrfData ? `${hrfData.team.youthTeamName} — S${hrfData.team.season} J${hrfData.team.matchRound}` : 'Gestion Équipe Junior Hattrick'}
           </span>
