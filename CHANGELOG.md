@@ -2,6 +2,14 @@
 
 Toutes les modifications notables de **ai-trick** sont documentées ici.
 
+## [0.6.1] - 2026-03-13
+
+### Amélioré
+- **Prompt : évaluation profil complet** — L'IA évalue maintenant les compétences secondaires du poste. Un Buteur 7 avec Passe 2 MAXÉ est traité comme un bouche-trou, pas un prospect.
+- **Prompt : formation optimisée** — La formation maximise les postes entraînables. Buteur + Construction → 2-5-3 (8 joueurs entraînés) au lieu de 3-4-3 (7 joueurs).
+- **Prompt : classement revu** — Les STARS doivent avoir un max 7+ ET des compétences secondaires correctes. Les joueurs unidimensionnels sont des bouche-trous.
+- Ajout d'exemples explicites de bonnes/mauvaises décisions dans le prompt.
+
 ## [0.6.0] - 2026-03-13
 
 ### Amélioré

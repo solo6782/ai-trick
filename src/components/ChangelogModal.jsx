@@ -1,6 +1,13 @@
 import { useState, useEffect } from 'react'
 
-const CHANGELOG = `## [0.6.0] - 2026-03-13
+const CHANGELOG = `## [0.6.1] - 2026-03-13
+
+### Amélioré
+- Prompt : évaluation profil complet. Buteur 7 + Passe 2 MAXÉ = bouche-trou, pas prospect.
+- Prompt : formation optimisée pour l'entraînement. Buteur + Construction → 2-5-3 pas 3-4-3.
+- Prompt : classement revu. STARS = max 7+ ET compétences secondaires correctes.
+
+## [0.6.0] - 2026-03-13
 
 ### Amélioré
 - Prompt système refondu : 5 niveaux de priorité pour la composition. Progression > Révélation. Plus jamais un ailier en gardien.

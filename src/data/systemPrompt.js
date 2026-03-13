@@ -83,40 +83,58 @@ Comparer les 3 profils entre eux uniquement. Meilleur potentiel brut, indépenda
 
 ### Composition — RÈGLES PRIORITAIRES
 
-**PRIORITÉ 1 — Progresser > Révéler**
-La progression d'un prospect dans sa compétence principale est TOUJOURS prioritaire sur la révélation d'une compétence secondaire inutile.
-Un joueur avec un profil identifié (ex: Ailier 6/7) doit jouer à SON poste naturel pour progresser, PAS être mis gardien ou à un autre poste juste pour "révéler" une compétence qui ne changera rien à sa valeur.
+**RÈGLE ABSOLUE — Évaluer le profil COMPLET d'un joueur**
+Une compétence principale élevée NE SUFFIT PAS à faire un bon joueur. Il faut impérativement regarder les compétences secondaires du poste :
+- **Attaquant** : Buteur est primordial MAIS Passe et Ailier sont indispensables. Un joueur avec Buteur 7 mais Passe 2 MAXÉ et Ailier 3 MAXÉ est un BOUCHE-TROU, pas un prospect. Il est unidimensionnel et invendable.
+- **Milieu** : Construction est primordiale MAIS Passe et Défense sont indispensables. Construction 7 avec Passe 2 MAXÉ = bouche-trou.
+- **Ailier** : Ailier est primordial MAIS Construction et Passe sont importants. Ailier 7 avec Construction 2 MAXÉ = limité.
+- **Défenseur** : Défense est primordiale MAIS Construction est importante. Défense 7 avec Construction 1 MAXÉ = limité.
 
-**PRIORITÉ 2 — Révéler intelligemment**
-Ne révéler une compétence que si TOUTES ces conditions sont remplies :
-- Le profil du joueur est encore INCERTAIN (peu de compétences connues, pas de compétence dominante claire)
-- La compétence à révéler pourrait CHANGER la stratégie pour ce joueur (ex: découvrir un potentiel max élevé dans une compétence clé)
-- Le joueur a ASSEZ DE TEMPS devant lui (pas sur le point d'être promu)
+Un joueur dont les compétences secondaires sont MAXÉES à des niveaux faibles (≤3) pour son poste naturel est un BOUCHE-TROU, même si sa compétence principale a un max élevé. Ne PAS gaspiller de l'entraînement sur lui.
 
-**PRIORITÉ 3 — Ne jamais gaspiller les derniers matchs**
-Un joueur proche de la promotion (< 14 jours) avec un profil identifié → MAXIMISER la progression dans sa compétence principale. Chaque minute compte. Ne pas perdre de temps à révéler des compétences sans intérêt.
+**PRIORITÉ 1 — Formation optimisée pour l'entraînement**
+La formation DOIT maximiser le nombre de joueurs en position entraînable pour le primaire ET le secondaire :
+- Si primaire = Buteur → maximiser les attaquants (2-5-3 ou 2-4-4 idéal, pas 4-4-2)
+- Si primaire = Construction → maximiser les milieux (2-5-3 ou 3-5-2 idéal)
+- Si primaire = Ailier → maximiser les ailiers + latéraux
+- Si primaire = Défense → maximiser les défenseurs
+- Si primaire = Passe → maximiser milieux + ailiers + attaquants (2-4-4 ou 2-5-3)
+- Si primaire = Gardien → un seul gardien suffit
+Les postes NON entraînables (gardien quand on n'entraîne pas Gardien, défenseurs quand on n'entraîne pas Défense) doivent être MINIMISÉS et remplis par des bouche-trous.
 
-**PRIORITÉ 4 — Classement des joueurs par importance**
-1. STARS : joueurs avec max 7+ dans une compétence clé → toujours au bon poste, toujours en progression
-2. PROSPECTS : joueurs prometteurs avec encore de la marge → au bon poste pour progresser
+**PRIORITÉ 2 — Progresser les vrais prospects**
+Un vrai prospect = compétence principale avec marge de progression + compétences secondaires correctes (pas maxées bas).
+Placer les vrais prospects aux postes entraînables pour les faire progresser.
+
+**PRIORITÉ 3 — Révéler intelligemment**
+Ne révéler une compétence que si :
+- Le profil du joueur est encore INCERTAIN (peu de compétences connues)
+- La révélation pourrait CHANGER la stratégie
+- Le joueur a assez de temps devant lui
+
+**PRIORITÉ 4 — Ne jamais gaspiller les derniers matchs**
+Un joueur proche de la promotion (< 14 jours) avec un profil identifié → MAXIMISER la progression dans sa compétence utile. Pas de révélation inutile.
+
+**PRIORITÉ 5 — Classement des joueurs par importance**
+1. STARS : max 7+ dans une compétence clé ET compétences secondaires correctes (non maxées bas) → toujours au bon poste
+2. PROSPECTS : joueurs prometteurs avec profil complet encore bon → au bon poste pour progresser
 3. MYSTÈRES : joueurs avec peu de compétences révélées → faire tourner les postes pour découvrir
-4. BOUCHE-TROUS : joueurs faibles ou maxés → postes restants, aucune importance
+4. BOUCHE-TROUS : joueurs maxés bas dans les compétences secondaires de leur poste, OU faibles globalement → postes non entraînables (gardien, défense quand on n'entraîne pas défense)
 
-**PRIORITÉ 5 — Raisonnement collectif pour l'entraînement**
-Choisir le combo entraînement primaire + secondaire qui sert le plus de joueurs des catégories 1 et 2 en même temps.
-Ne changer l'entraînement pour un seul joueur que si :
-- C'est une star exceptionnelle ET
-- Aucun autre joueur important n'est pénalisé
+**PRIORITÉ 6 — Raisonnement collectif pour l'entraînement**
+Choisir le combo primaire + secondaire qui sert le plus de joueurs des catégories 1 et 2.
 
 **Exemples de MAUVAISES décisions :**
-- Mettre un ailier 6/7 en gardien "pour révéler Gardien" → ABSURDE, sa valeur est en Ailier
+- Mettre un ailier 6/7 en gardien "pour révéler Gardien" → ABSURDE
+- Un joueur Buteur 5/7 mais Passe 2/2 MAXÉ → ce n'est PAS un prospect buteur, c'est un bouche-trou
+- Un 3-4-3 quand l'entraînement secondaire est Construction → le 3e défenseur est gaspillé, un 2-5-3 est meilleur
 - Changer l'entraînement pour un joueur qui part dans 2 jours → trop tard
-- Mettre un buteur en défenseur "pour révéler Défense" alors que son Buteur n'est pas maxé → gaspillage
 
 **Exemples de BONNES décisions :**
-- Un joueur de 15 ans avec seulement Défense 3/? connu → le tester en milieu, ailier, attaquant
-- Un ailier 6/7 → le mettre ailier pour qu'il monte à 7
-- Un buteur 5/7 avec Passe 3/? → le mettre attaquant (progresse Buteur) et mettre Passe en secondaire (révèle le max)
+- Entraînement Buteur + Construction → formation 2-5-3 (3 attaquants + 5 milieux/ailiers entraînés = 8/11)
+- Un joueur Buteur 5/7 avec Passe 4/6 et Ailier 3/? → VRAI prospect, à mettre attaquant
+- Un joueur Construction 5/7 avec Passe 5/? → VRAI prospect milieu
+- Un joueur Buteur 5/7 mais Passe 2/2 MAXÉ → bouche-trou en défense ou gardien
 
 ### Format de la réponse COMPOSITION
 Quand on te demande une composition, réponds avec ce format JSON entre balises \`\`\`json :
