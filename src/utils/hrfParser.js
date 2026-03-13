@@ -145,6 +145,36 @@ export function getSkillColor(current, max) {
   return 'unknown';
 }
 
+/**
+ * Parse a date string handling both DD-MM-YYYY and YYYY-MM-DD formats.
+ * Returns a Date object or null if invalid.
+ */
+export function parseDate(str) {
+  if (!str) return null;
+  // DD-MM-YYYY or DD/MM/YYYY
+  const euMatch = str.match(/^(\d{1,2})[-/](\d{1,2})[-/](\d{4})/);
+  if (euMatch) {
+    return new Date(parseInt(euMatch[3]), parseInt(euMatch[2]) - 1, parseInt(euMatch[1]));
+  }
+  // YYYY-MM-DD (HRF format, already correct)
+  const isoMatch = str.match(/^(\d{4})-(\d{2})-(\d{2})/);
+  if (isoMatch) {
+    return new Date(parseInt(isoMatch[1]), parseInt(isoMatch[2]) - 1, parseInt(isoMatch[3]));
+  }
+  // Fallback
+  const d = new Date(str);
+  return isNaN(d.getTime()) ? null : d;
+}
+
+/**
+ * Format a date string to fr-FR locale, handling DD-MM-YYYY format.
+ */
+export function formatDateFR(str, options) {
+  const d = parseDate(str);
+  if (!d) return str || '—';
+  return d.toLocaleDateString('fr-FR', options || { day: 'numeric', month: 'long', year: 'numeric' });
+}
+
 export { SKILL_LEVELS, SPECIALTY_MAP, POSITION_CODES };
 
 /**

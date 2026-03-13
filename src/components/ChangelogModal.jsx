@@ -1,0 +1,93 @@
+import { useState, useEffect } from 'react'
+
+const CHANGELOG = `## [0.4.2] - 2026-03-13
+
+### Corrigé
+- Dates au format européen (DD-MM-YYYY) correctement interprétées
+- Toutes les dates utilisent un parser centralisé
+
+### Ajouté
+- Changelog cliquable depuis le numéro de version dans le header
+
+## [0.4.1] - 2026-03-13
+
+### Corrigé
+- Rapports dans fiche joueur : n'affiche plus que les phrases du rapport coach mentionnant le joueur
+
+### Ajouté
+- Numéro de version affiché dans le header et dans Paramètres
+
+## [0.4.0] - 2026-03-13
+
+### Corrigé
+- Bug critique : l'API /api/history ne recevait pas les données
+- Bug : référence à showImportHistory cassait l'app
+- Bug : les rapports affichaient tout au lieu de filtrer par joueur
+
+### Amélioré
+- Import en masse chunké (paquets de 200)
+- Rafraîchissement auto de l'historique après import
+
+## [0.3.0] - 2026-03-13
+
+### Ajouté
+- Score de potentiel (0-100) calculé automatiquement
+- Prédictions IA des compétences inconnues (bouton Analyser)
+- Import HRF historique en masse (sélection multiple)
+- Historique des matchs par joueur dans le panneau de détail
+- Tables D1 ai_predictions et player_match_history
+
+## [0.2.0] - 2026-03-13
+
+### Ajouté
+- Onglet Rapports (liste, modification, suppression)
+- Passage au stockage Cloudflare D1
+- Renommage en ai-trick
+
+## [0.1.0] - 2026-03-13
+
+### Ajouté
+- Import et parsing de fichiers HRF
+- Tableau compact des joueurs jeunes
+- Panneau de détail joueur avec barres de progression
+- Import de rapports de match (3 champs)
+- Composition IA avec Plan B
+- Recrutement IA (analyse des 3 profils scouts)
+- Promotions et Licenciements IA
+- Page Paramètres (clé API + notes complémentaires)
+- Prompt système complet avec règles Hattrick
+- Dark mode
+- Proxy Cloudflare Pages Function pour l'API Anthropic`;
+
+export default function ChangelogModal({ onClose }) {
+  return (
+    <div className="modal-overlay" onClick={onClose}>
+      <div className="modal" onClick={e => e.stopPropagation()} style={{ width: 640, maxHeight: '85vh' }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 }}>
+          <h2>📋 Changelog</h2>
+          <button className="close-btn" onClick={onClose}>✕</button>
+        </div>
+        <div style={{
+          fontSize: '0.82rem',
+          color: 'var(--text-secondary)',
+          lineHeight: 1.8,
+          whiteSpace: 'pre-wrap',
+          fontFamily: 'var(--font-main)'
+        }}>
+          {CHANGELOG.split('\n').map((line, i) => {
+            if (line.startsWith('## ')) {
+              return <h3 key={i} style={{ color: 'var(--accent-green)', fontSize: '1rem', fontWeight: 700, marginTop: i > 0 ? 20 : 0, marginBottom: 8 }}>{line.replace('## ', '')}</h3>
+            }
+            if (line.startsWith('### ')) {
+              return <h4 key={i} style={{ color: 'var(--accent-blue)', fontSize: '0.85rem', fontWeight: 600, marginTop: 12, marginBottom: 4 }}>{line.replace('### ', '')}</h4>
+            }
+            if (line.startsWith('- ')) {
+              return <div key={i} style={{ paddingLeft: 12, marginBottom: 2 }}>• {line.replace('- ', '')}</div>
+            }
+            return <div key={i}>{line}</div>
+          })}
+        </div>
+      </div>
+    </div>
+  )
+}

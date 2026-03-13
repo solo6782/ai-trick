@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { formatDateFR } from '../utils/hrfParser'
 
 export default function ReportsPage({ matchReports, onDelete, onEdit }) {
   const [expandedId, setExpandedId] = useState(null)
@@ -73,7 +74,7 @@ export default function ReportsPage({ matchReports, onDelete, onEdit }) {
             >
               <h3 style={{ color: 'var(--text-bright)', fontSize: '0.9rem' }}>
                 <span style={{ color: 'var(--accent-blue)' }}>
-                  {report.date ? new Date(report.date).toLocaleDateString('fr-FR', { weekday: 'short', day: 'numeric', month: 'long', year: 'numeric' }) : 'Date inconnue'}
+                  {report.date ? formatDateFR(report.date, { weekday: 'short', day: 'numeric', month: 'long', year: 'numeric' }) : 'Date inconnue'}
                 </span>
                 <span style={{ color: 'var(--text-muted)', marginLeft: 12, fontSize: '0.78rem', fontFamily: 'var(--font-mono)' }}>
                   ID {id}
@@ -136,7 +137,7 @@ export default function ReportsPage({ matchReports, onDelete, onEdit }) {
                 </div>
 
                 <div style={{ fontSize: '0.72rem', color: 'var(--text-muted)', marginTop: 8 }}>
-                  Enregistré le {report.savedAt ? new Date(report.savedAt).toLocaleString('fr-FR') : '—'}
+                  Enregistré le {report.savedAt ? formatDateFR(report.savedAt) : '—'}
                 </div>
               </div>
             )}

@@ -1,4 +1,5 @@
 import { useState, useMemo } from 'react'
+import { formatDateFR } from '../utils/hrfParser'
 
 export default function ImportReportModal({ players, existingReports, onSave, onClose }) {
   const matches = useMemo(() => {
@@ -33,7 +34,7 @@ export default function ImportReportModal({ players, existingReports, onSave, on
           <select value={matchId} onChange={e => setMatchId(e.target.value)}>
             {matches.map(m => (
               <option key={m.id} value={m.id}>
-                {new Date(m.date).toLocaleDateString('fr-FR')} — ID {m.id}
+                {formatDateFR(m.date)} — ID {m.id}
                 {existingReports[m.id] ? ' ✓ (déjà importé)' : ''}
               </option>
             ))}

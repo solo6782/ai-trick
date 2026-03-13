@@ -1,4 +1,4 @@
-import { getSkillLabel, getPositionLabel, formatAge } from '../utils/hrfParser'
+import { getSkillLabel, getPositionLabel, formatAge, formatDateFR } from '../utils/hrfParser'
 import { getScoreColor } from '../utils/scoreCalculator'
 
 const SKILL_KEYS = [
@@ -75,7 +75,7 @@ export default function PlayerDetail({ player, matchReports, predictions, score,
         <div className="detail-meta">
           <div className="meta-item"><strong>{formatAge(player.age, player.ageDays)}</strong></div>
           <div className="meta-item">Promo : <strong>{player.isPromotable ? '✅ Prêt' : `dans ${player.daysUntilPromotion}j`}</strong></div>
-          <div className="meta-item">Arrivée : <strong>{new Date(player.arrivalDate).toLocaleDateString('fr-FR')}</strong></div>
+          <div className="meta-item">Arrivée : <strong>{formatDateFR(player.arrivalDate)}</strong></div>
           <div className="meta-item">Buts : <strong>{player.careerGoals}</strong> (ligue: {player.leagueGoals}, amicaux: {player.friendlyGoals})</div>
           {player.isInjured && <div className="meta-item"><span className="tag tag-injured">Blessé</span></div>}
           {player.cards > 0 && <div className="meta-item"><span className="tag tag-card">{player.cards} carton(s)</span></div>}
@@ -86,7 +86,7 @@ export default function PlayerDetail({ player, matchReports, predictions, score,
           {SKILL_KEYS.map(({ key, name, color }) => <SkillBar key={key} name={name} skill={player.skills[key]} prediction={pred[key]} color={color} />)}
           {predictions?.[player.id]?.updatedAt && (
             <div style={{ fontSize: '0.72rem', color: 'var(--text-muted)', marginTop: 8 }}>
-              Prédictions IA du {new Date(predictions[player.id].updatedAt).toLocaleString('fr-FR')}
+              Prédictions IA du {formatDateFR(predictions[player.id].updatedAt)}
             </div>
           )}
         </div>
@@ -95,7 +95,7 @@ export default function PlayerDetail({ player, matchReports, predictions, score,
           <div className="detail-section">
             <h3>Dernier match</h3>
             <div className="detail-meta">
-              <div className="meta-item">Date : <strong>{new Date(player.lastMatch.date).toLocaleDateString('fr-FR')}</strong></div>
+              <div className="meta-item">Date : <strong>{formatDateFR(player.lastMatch.date)}</strong></div>
               <div className="meta-item">Poste : <strong>{getPositionLabel(player.lastMatch.positionCode)}</strong></div>
               <div className="meta-item">Minutes : <strong>{player.lastMatch.playedMinutes}</strong></div>
               <div className="meta-item">Note : <strong>{player.lastMatch.rating}★</strong></div>
@@ -127,7 +127,7 @@ export default function PlayerDetail({ player, matchReports, predictions, score,
                   {history.map((h, i) => (
                     <tr key={i} style={{ borderBottom: '1px solid var(--border)' }}>
                       <td style={{ padding: '6px 8px', color: 'var(--text-secondary)' }}>
-                        {h.match_date ? new Date(h.match_date).toLocaleDateString('fr-FR') : '—'}
+                        {h.match_date ? formatDateFR(h.match_date) : '—'}
                       </td>
                       <td style={{ padding: '6px 8px' }}>{getPositionLabel(h.position_code)}</td>
                       <td style={{ padding: '6px 8px', textAlign: 'center', fontFamily: 'var(--font-mono)' }}>{h.played_minutes}</td>
@@ -173,7 +173,7 @@ export default function PlayerDetail({ player, matchReports, predictions, score,
               {relevantSentences.map((entry, i) => (
                 <div key={i} style={{ marginBottom: 12 }}>
                   <div style={{ fontSize: '0.78rem', color: 'var(--text-muted)', marginBottom: 4 }}>
-                    {entry.date ? new Date(entry.date).toLocaleDateString('fr-FR') : `Match ${entry.matchId}`}
+                    {entry.date ? formatDateFR(entry.date) : `Match ${entry.matchId}`}
                   </div>
                   {entry.sentences.map((s, j) => (
                     <div key={j} className="scout-comment" style={{ borderLeftColor: 'var(--accent-green)' }}>{s}</div>

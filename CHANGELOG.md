@@ -2,6 +2,16 @@
 
 Toutes les modifications notables de **ai-trick** sont documentées ici.
 
+## [0.4.2] - 2026-03-13
+
+### Corrigé
+- **Dates au format européen** : les dates DD-MM-YYYY et DD/MM/YYYY sont maintenant correctement interprétées (plus de confusion mois/jour)
+- Toutes les dates de l'app utilisent le nouveau parser centralisé `formatDateFR`
+
+### Ajouté
+- **Changelog cliquable** : clic sur le numéro de version dans le header pour voir l'historique des changements
+- Composant `ChangelogModal` avec rendu formaté du changelog
+
 ## [0.4.1] - 2026-03-13
 
 ### Corrigé

@@ -12,6 +12,7 @@ import RecruitmentModal from './components/RecruitmentModal'
 import CompositionPanel from './components/CompositionPanel'
 import AIAlerts from './components/AIAlerts'
 import ReportsPage from './components/ReportsPage'
+import ChangelogModal from './components/ChangelogModal'
 import Settings from './components/Settings'
 
 export default function App() {
@@ -24,6 +25,7 @@ export default function App() {
   const [showImportReport, setShowImportReport] = useState(false)
   const [showRecruitment, setShowRecruitment] = useState(false)
   const [showComposition, setShowComposition] = useState(false)
+  const [showChangelog, setShowChangelog] = useState(false)
   const [predictions, setPredictions] = useState({})
   const [scores, setScores] = useState({})
   const [playerHistory, setPlayerHistory] = useState([])
@@ -137,7 +139,7 @@ export default function App() {
       <header className="header">
         <div className="header-title">
           <h1>ai-trick</h1>
-          <span style={{ fontSize: '0.7rem', color: 'var(--text-muted)', fontFamily: 'var(--font-mono)' }}>v{VERSION}</span>
+          <span onClick={() => setShowChangelog(true)} style={{ fontSize: '0.7rem', color: 'var(--text-muted)', fontFamily: 'var(--font-mono)', cursor: 'pointer', textDecoration: 'underline', textDecorationStyle: 'dotted' }} title="Voir le changelog">v{VERSION}</span>
           <span className="subtitle">
             {hrfData ? `${hrfData.team.youthTeamName} — S${hrfData.team.season} J${hrfData.team.matchRound}` : 'Gestion Équipe Junior Hattrick'}
           </span>
@@ -206,6 +208,7 @@ export default function App() {
       {showRecruitment && <RecruitmentModal hrfData={hrfData} onClose={() => setShowRecruitment(false)} />}
       {showComposition && <CompositionPanel hrfData={hrfData} matchReports={matchReports} onClose={() => setShowComposition(false)} />}
       {selectedPlayer && <PlayerDetail player={selectedPlayer} matchReports={matchReports} predictions={predictions} score={scores[selectedPlayer.id]} playerHistory={playerHistory} onClose={() => setSelectedPlayer(null)} />}
+      {showChangelog && <ChangelogModal onClose={() => setShowChangelog(false)} />}
     </div>
   )
 }
