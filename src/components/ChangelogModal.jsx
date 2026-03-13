@@ -1,6 +1,14 @@
 import { useState, useEffect } from 'react'
 
-const CHANGELOG = `## [0.4.3] - 2026-03-13
+const CHANGELOG = `## [0.5.0] - 2026-03-13
+
+### Ajouté
+- Tri sur toutes les colonnes du tableau (y compris GK, DEF, CON, AIL, PAS, BUT, CF)
+- Analyses Promotions/Licenciements repliables (clic sur le titre)
+- Analyses persistantes (sauvegardées en D1, survivent au rechargement)
+- Bouton "Relancer l'analyse" dans chaque panneau
+
+## [0.4.3] - 2026-03-13
 
 ### Corrigé
 - Tri chronologique des rapports et de l'historique (plus récent en premier)

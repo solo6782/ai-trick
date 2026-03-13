@@ -2,6 +2,14 @@
 
 Toutes les modifications notables de **ai-trick** sont documentées ici.
 
+## [0.5.0] - 2026-03-13
+
+### Ajouté
+- **Tri sur toutes les colonnes** du tableau de bord, y compris les 7 compétences (GK, DEF, CON, AIL, PAS, BUT, CF)
+- **Analyses repliables** : clic sur le titre pour replier/déplier les analyses Promotions et Licenciements
+- **Analyses persistantes** : les résultats sont sauvegardés en D1, ils survivent à un changement de page ou un rechargement
+- Bouton "Relancer l'analyse" visible quand une analyse est dépliée
+
 ## [0.4.3] - 2026-03-13
 
 ### Corrigé
