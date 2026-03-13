@@ -140,17 +140,31 @@ export default function PlayerDetail({ player, matchReports, predictions, score,
           </div>
         )}
 
-        {Object.keys(matchReports).length > 0 && (
-          <div className="detail-section">
-            <h3>Rapports de match</h3>
-            {Object.entries(matchReports).map(([id, r]) => (
-              <div key={id} style={{ marginBottom: 12 }}>
-                <div style={{ fontSize: '0.78rem', color: 'var(--text-muted)', marginBottom: 4 }}>Match {id} — {r.date || ''}</div>
-                {r.rapport && <div className="scout-comment" style={{ borderLeftColor: 'var(--accent-green)' }}>{r.rapport}</div>}
-              </div>
-            ))}
-          </div>
-        )}
+        {Object.keys(matchReports).length > 0 && (() => {
+          // Filter reports that mention this player by name
+          const playerNames = [player.name, player.firstName, player.lastName].filter(n => n && n.length > 2);
+          const relevantReports = Object.entries(matchReports).filter(([id, r]) => {
+            const allText = [r.rapport, r.compteRendu, r.notesDetaillees].join(' ');
+            return playerNames.some(name => allText.toLowerCase().includes(name.toLowerCase()));
+          });
+
+          if (relevantReports.length === 0) return null;
+
+          return (
+            <div className="detail-section">
+              <h3>Rapports mentionnant {player.firstName} ({relevantReports.length})</h3>
+              {relevantReports.map(([id, r]) => (
+                <div key={id} style={{ marginBottom: 12 }}>
+                  <div style={{ fontSize: '0.78rem', color: 'var(--text-muted)', marginBottom: 4 }}>
+                    Match {id} — {r.date ? new Date(r.date).toLocaleDateString('fr-FR') : ''}
+                  </div>
+                  {r.rapport && <div className="scout-comment" style={{ borderLeftColor: 'var(--accent-green)' }}>{r.rapport}</div>}
+                  {r.compteRendu && <div className="scout-comment" style={{ borderLeftColor: 'var(--accent-orange)' }}>{r.compteRendu}</div>}
+                </div>
+              ))}
+            </div>
+          );
+        })()}
       </div>
     </div>
   )

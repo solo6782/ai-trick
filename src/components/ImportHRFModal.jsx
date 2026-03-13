@@ -2,7 +2,7 @@ import { useState, useRef } from 'react'
 import { parseHRF, extractMatchHistory } from '../utils/hrfParser'
 import { savePlayerHistory } from '../utils/storage'
 
-export default function ImportHRFModal({ onImport, onClose }) {
+export default function ImportHRFModal({ onImport, onHistoryImported, onClose }) {
   const [mode, setMode] = useState('current') // 'current' or 'history'
   const [text, setText] = useState('')
   const [historyFiles, setHistoryFiles] = useState([])
@@ -46,14 +46,19 @@ export default function ImportHRFModal({ onImport, onClose }) {
       }
     }
 
-    // Save all records in one batch
+    // Save records in chunks (API has limits)
     if (allRecords.length > 0) {
-      setProgress(`Sauvegarde de ${allRecords.length} entrées...`)
-      await savePlayerHistory(allRecords)
+      const CHUNK = 200
+      for (let i = 0; i < allRecords.length; i += CHUNK) {
+        const chunk = allRecords.slice(i, i + CHUNK)
+        setProgress(`Sauvegarde ${i + chunk.length}/${allRecords.length}...`)
+        await savePlayerHistory(chunk)
+      }
     }
 
     setProgress(`✅ Terminé ! ${totalRecords} notes individuelles extraites de ${historyFiles.length} fichiers.`)
     setImporting(false)
+    if (onHistoryImported) onHistoryImported()
   }
 
   async function handleCurrentImport() {

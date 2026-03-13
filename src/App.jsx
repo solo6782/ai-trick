@@ -199,7 +199,7 @@ export default function App() {
 
       {page === 'reports' && <ReportsPage matchReports={matchReports} onDelete={handleReportDelete} onEdit={handleReportEdit} />}
 
-      {showImportHRF && <ImportHRFModal onImport={handleHRFImport} onClose={() => setShowImportHRF(false)} />}
+      {showImportHRF && <ImportHRFModal onImport={handleHRFImport} onHistoryImported={async () => { const h = await loadPlayerHistory(); setPlayerHistory(h); }} onClose={() => setShowImportHRF(false)} />}
       {showImportReport && hrfData && <ImportReportModal players={hrfData.youthPlayers} existingReports={matchReports} onSave={handleReportSave} onClose={() => setShowImportReport(false)} />}
       {showRecruitment && <RecruitmentModal hrfData={hrfData} onClose={() => setShowRecruitment(false)} />}
       {showComposition && <CompositionPanel hrfData={hrfData} matchReports={matchReports} onClose={() => setShowComposition(false)} />}
