@@ -23,16 +23,22 @@ function parseCompoResponse(raw) {
 function CompoDetails({ data }) {
   return (
     <div>
-      {/* Training recommendation */}
+      {/* Training + Tactic */}
       <div style={{ display: 'flex', gap: 16, marginBottom: 16, flexWrap: 'wrap' }}>
-        <div style={{ flex: 1, minWidth: 200, padding: 12, background: 'var(--bg-input)', borderRadius: 'var(--radius-sm)', borderLeft: '3px solid var(--accent-blue)' }}>
+        <div style={{ flex: 1, minWidth: 150, padding: 12, background: 'var(--bg-input)', borderRadius: 'var(--radius-sm)', borderLeft: '3px solid var(--accent-blue)' }}>
           <div style={{ fontSize: '0.72rem', color: 'var(--text-muted)', textTransform: 'uppercase', marginBottom: 4 }}>Entraînement primaire</div>
           <div style={{ fontSize: '0.9rem', fontWeight: 700, color: 'var(--accent-blue)' }}>{data.primaryTraining}</div>
         </div>
-        <div style={{ flex: 1, minWidth: 200, padding: 12, background: 'var(--bg-input)', borderRadius: 'var(--radius-sm)', borderLeft: '3px solid var(--accent-purple)' }}>
+        <div style={{ flex: 1, minWidth: 150, padding: 12, background: 'var(--bg-input)', borderRadius: 'var(--radius-sm)', borderLeft: '3px solid var(--accent-purple)' }}>
           <div style={{ fontSize: '0.72rem', color: 'var(--text-muted)', textTransform: 'uppercase', marginBottom: 4 }}>Entraînement secondaire</div>
           <div style={{ fontSize: '0.9rem', fontWeight: 700, color: 'var(--accent-purple)' }}>{data.secondaryTraining}</div>
         </div>
+        {data.tactic && (
+          <div style={{ flex: 1, minWidth: 150, padding: 12, background: 'var(--bg-input)', borderRadius: 'var(--radius-sm)', borderLeft: '3px solid var(--accent-orange)' }}>
+            <div style={{ fontSize: '0.72rem', color: 'var(--text-muted)', textTransform: 'uppercase', marginBottom: 4 }}>Tactique</div>
+            <div style={{ fontSize: '0.9rem', fontWeight: 700, color: 'var(--accent-orange)' }}>{data.tactic}</div>
+          </div>
+        )}
       </div>
 
       {data.trainingJustification && (
@@ -44,7 +50,7 @@ function CompoDetails({ data }) {
       {/* Pitch graphic */}
       <PitchView lineup={data.lineup || []} formation={data.formation} subs={data.subs} />
 
-      {/* Player details */}
+      {/* Player details with orders */}
       {data.lineup && data.lineup.length > 0 && (
         <div style={{ marginTop: 12 }}>
           <div style={{ fontSize: '0.75rem', fontWeight: 600, color: 'var(--text-muted)', textTransform: 'uppercase', marginBottom: 8 }}>Justifications</div>
@@ -52,7 +58,24 @@ function CompoDetails({ data }) {
             <div key={i} style={{ fontSize: '0.78rem', padding: '4px 0', borderBottom: '1px solid var(--border)' }}>
               <strong style={{ color: 'var(--text-bright)' }}>{p.playerName}</strong>
               <span style={{ color: 'var(--text-muted)' }}> ({p.position})</span>
+              {p.order && p.order !== 'Normal' && (
+                <span style={{ color: 'var(--accent-orange)', fontSize: '0.72rem', marginLeft: 6 }}>▸ {p.order}</span>
+              )}
               <span style={{ color: 'var(--text-secondary)' }}> — {p.reason}</span>
+            </div>
+          ))}
+        </div>
+      )}
+
+      {/* Substitutions */}
+      {data.substitutions && data.substitutions.length > 0 && (
+        <div style={{ marginTop: 16, padding: 12, background: 'var(--bg-input)', borderRadius: 'var(--radius-sm)' }}>
+          <div style={{ fontSize: '0.75rem', fontWeight: 600, color: 'var(--accent-cyan)', textTransform: 'uppercase', marginBottom: 8 }}>🔄 Remplacements programmés</div>
+          {data.substitutions.map((s, i) => (
+            <div key={i} style={{ fontSize: '0.78rem', padding: '4px 0', color: 'var(--text-secondary)' }}>
+              <strong style={{ color: 'var(--accent-cyan)' }}>{s.minute}'</strong> — {s.out} ↔ {s.in}
+              {s.position && <span style={{ color: 'var(--text-muted)' }}> ({s.position})</span>}
+              {s.reason && <span> — {s.reason}</span>}
             </div>
           ))}
         </div>

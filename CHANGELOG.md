@@ -2,6 +2,18 @@
 
 Toutes les modifications notables de **ai-trick** sont documentées ici.
 
+## [0.7.0] - 2026-03-14
+
+### Refonte majeure du prompt système
+- **Guide académie intégré** : jeu créatif obligatoire, ordres individuels (milieux défensifs pour révéler costaud, joueurs révélés vers le milieu), substitution à la 89e, malus 20% si même entraînement primaire/secondaire
+- **Classification des joueurs** : 3 catégories claires — Stars/Prospects (à entraîner), Mystères (à explorer en priorité), Golfeurs (bouche-trous utiles en postes morts)
+- **Golfeurs INTERDITS en poste entraînable** — Un Buteur 5/7 + Passe 2 MAXÉ = golfeur, va en gardien/défense
+- **Mystères TOUJOURS alignés** — Les jeunes de 15 ans avec peu de compétences révélées jouent systématiquement, même à un poste non entraînable, pour découvrir leur profil
+- **Grille de valeur des joueurs** : somme des 3 meilleures compétences (médiocre 13-18, faible 19-24, inadéquat 25-30, passable 31-36, honorable 37-42)
+- **Ordres individuels dans la compo** : Normal, Défensif, Offensif, Vers le centre affichés pour chaque joueur
+- **Substitutions à la 89e** dans la compo pour tester un mystère dans un nouveau poste
+- **Tactique affichée** dans le panneau de composition
+
 ## [0.6.3] - 2026-03-13
 
 ### Amélioré

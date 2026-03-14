@@ -1,6 +1,15 @@
 import { useState, useEffect } from 'react'
 
-const CHANGELOG = `## [0.6.3] - 2026-03-13
+const CHANGELOG = `## [0.7.0] - 2026-03-14
+
+### Refonte majeure du prompt
+- Guide académie intégré (jeu créatif, ordres individuels, sub 89e, malus même entraînement)
+- 3 catégories de joueurs : Stars/Prospects, Mystères (TOUJOURS alignés), Golfeurs (postes morts UNIQUEMENT)
+- Grille de valeur : somme des 3 meilleures compétences
+- Ordres individuels et substitutions à la 89e dans la compo
+- Tactique Jeu créatif affichée
+
+## [0.6.3] - 2026-03-13
 
 ### Amélioré
 - Terrain retourné : gardien en haut, attaquants en bas
