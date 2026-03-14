@@ -1,6 +1,16 @@
 import { useState, useEffect } from 'react'
 
-const CHANGELOG = `## [0.9.1] - 2026-03-14
+const CHANGELOG = `## [0.9.2] - 2026-03-14
+
+### Corrigé
+- Compo ne re-analyse plus : reçoit uniquement les classifications + résumé compact
+- anthropic-version corrigé à 2023-06-01
+
+### Ajouté
+- Feedback après analyse (bannière verte/rouge avec résumé des catégories)
+- Appel API séparé pour la compo (prompt système + résumé joueurs, pas de HRF brut)
+
+## [0.9.1] - 2026-03-14
 
 ### Corrigé
 - Bug critique : max_tokens trop bas (4096 → 16384), causait des JSON tronqués

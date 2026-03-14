@@ -2,6 +2,16 @@
 
 Toutes les modifications notables de **ai-trick** sont documentées ici.
 
+## [0.9.2] - 2026-03-14
+
+### Corrigé
+- **Compo ne re-analyse plus** : la composition reçoit uniquement les classifications pré-calculées + les compétences résumées (1 ligne par joueur). Opus n'a plus accès aux données brutes (historique, rapports) → il compose au lieu de re-analyser.
+- **anthropic-version** remis à `2023-06-01` (seule version valide de l'API).
+
+### Ajouté
+- **Feedback après analyse** : bannière verte avec le résumé "✅ 14 joueurs analysés : 2 STAR, 3 PROSPECT, 4 MYSTERE, 5 GOLFEUR" (ou rouge en cas d'erreur). Disparaît après 10s.
+- **Appel API séparé pour la compo** : n'envoie pas le contexte HRF brut, seulement le prompt système (règles) + le résumé compact des joueurs avec leurs catégories.
+
 ## [0.9.1] - 2026-03-14
 
 ### Corrigé

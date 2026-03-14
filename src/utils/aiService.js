@@ -168,51 +168,81 @@ Joueurs : ${playerIds.join(', ')}`, hrfData, matchReports);
   return parsed;
 }
 
-// ── STEP 2: Composition (uses pre-computed classifications) ──
+// ── STEP 2: Composition (compact call - NO raw HRF data) ──
+
+function buildCompactPlayerList(hrfData, predictions) {
+  const lines = [];
+  for (const p of hrfData.youthPlayers) {
+    const pred = predictions?.[p.id] || {};
+    const skills = [];
+    for (const [name, key] of [['GK','keeper'],['DEF','defender'],['CON','playmaker'],['AIL','winger'],['PAS','passing'],['BUT','scorer'],['CF','setPieces']]) {
+      const s = p.skills[key];
+      const cur = s.current !== null ? s.current : '?';
+      const max = s.max !== null ? s.max : '?';
+      const maxed = s.maxReached ? ' MAXÉ' : '';
+      skills.push(`${name}:${cur}/${max}${maxed}`);
+    }
+    const cat = pred.category || '?';
+    const pos = pred.naturalPosition || '?';
+    const promo = p.isPromotable ? 'PRÊT' : `${p.daysUntilPromotion}j`;
+    lines.push(`- ${p.name} (ID:${p.id}) | ${p.age}a ${p.ageDays}j | Spé:${p.specialtyLabel || '-'} | Promo:${promo} | CAT:${cat} | Poste:${pos} | ${skills.join(', ')} | ${pred.justification || ''}`);
+  }
+  return lines.join('\n');
+}
+
+async function callAICompo(message) {
+  const apiKey = await loadApiKey();
+  if (!apiKey) throw new Error('Clé API Anthropic non configurée.');
+
+  const customNotes = await loadCustomNotes();
+  const systemPrompt = buildFullPrompt(customNotes);
+
+  const res = await fetch('/api/chat', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ apiKey, system: systemPrompt, message })
+  });
+
+  if (!res.ok) { const e = await res.text(); throw new Error(`Erreur API: ${res.status} — ${e}`); }
+  const data = await res.json();
+  return data.content?.[0]?.text || 'Pas de réponse.';
+}
 
 export async function askComposition(hrfData, matchReports, predictions) {
-  // Build classification summary from stored predictions
-  let classifSummary = '';
-  if (predictions && Object.keys(predictions).length > 0) {
-    classifSummary = '\n## CLASSIFICATION PRÉ-CALCULÉE (issue de l\'analyse)\n';
-    for (const player of hrfData.youthPlayers) {
-      const pred = predictions[player.id];
-      if (pred?.category) {
-        classifSummary += `- **${player.name}** : ${pred.category} — ${pred.justification || ''} | Poste: ${pred.naturalPosition || '?'} | Manque: ${(pred.missingSkills || []).join(', ') || 'RAS'}\n`;
-      }
-    }
-    classifSummary += '\nCette classification est DÉFINITIVE. Utilise-la directement pour le placement.\n';
-  }
+  const playerList = buildCompactPlayerList(hrfData, predictions);
+  const training = hrfData?.training?.type || 'inconnu';
 
-  return callAI(`${classifSummary}
+  return callAICompo(`## EFFECTIF (${hrfData.youthPlayers.length} joueurs) — Entraînement senior: ${training}
 
-Propose la composition pour le prochain match junior.
+${playerList}
 
-UTILISE la classification ci-dessus pour placer les joueurs :
-1. STARS et PROSPECTS → postes entraînables (primaire ou secondaire)
-2. MYSTÈRES → TOUJOURS alignés, postes de test ou entraînables restants. JAMAIS sur le banc.
-3. GOLFEURS → postes morts (gardien, défenseurs si pas entraînement Défense). Ils FORCENT les révélations.
-4. INUTILES → banc
+## DEMANDE
+Compose le 11 pour le prochain match junior. Les catégories (CAT) sont DÉJÀ CALCULÉES. Ne les recalcule PAS.
 
-Choisis l'entraînement primaire + secondaire (JAMAIS le même type), la formation, les ordres individuels, et les substitutions à la 89e.
+ÉTAPES :
+1. Choisis entraînement PRIMAIRE + SECONDAIRE (JAMAIS le même). Justifie en 1 phrase.
+2. Choisis la FORMATION optimale pour ce combo (cf. règles du prompt).
+3. Place les joueurs : STARS/PROSPECTS → postes entraînables. MYSTÈRES → alignés obligatoirement (postes test ou entraînables). GOLFEURS → postes morts. INUTILES → banc.
+4. Ordres individuels (Défensif/Normal/Offensif/Vers le centre) selon les règles.
+5. Substitutions 89e si un mystère peut tester un nouveau poste.
 
-Réponds UNIQUEMENT avec le JSON demandé dans les instructions système.`, hrfData, matchReports);
+Réponds UNIQUEMENT avec le JSON ci-dessous, RIEN d'autre :
+{"primaryTraining":"X","secondaryTraining":"Y","trainingJustification":"1 phrase","tactic":"Jeu créatif","formation":"X-X-X","lineup":[{"position":"Poste","playerId":"ID","playerName":"Nom","order":"Normal","reason":"10 mots max"}],"subs":[{"playerName":"Nom","reason":"10 mots max"}],"substitutions":[{"minute":89,"out":"Nom","in":"Nom","position":"Poste","reason":"10 mots max"}],"trainingChange":null,"summary":"2 phrases max"}`);
 }
 
 export async function askCompositionPlanB(hrfData, matchReports, feedback = '', predictions = null) {
-  let classifSummary = '';
-  if (predictions && Object.keys(predictions).length > 0) {
-    classifSummary = '\n## CLASSIFICATION PRÉ-CALCULÉE\n';
-    for (const player of hrfData.youthPlayers) {
-      const pred = predictions[player.id];
-      if (pred?.category) {
-        classifSummary += `- ${player.name}: ${pred.category}\n`;
-      }
-    }
-  }
-
+  const playerList = buildCompactPlayerList(hrfData, predictions);
   const extra = feedback ? `\nRaison du refus : ${feedback}` : '';
-  return callAI(`${classifSummary}\nPlan A refusé.${extra}\nPropose un PLAN B avec approche DIFFÉRENTE. Respecte les catégories de joueurs.`, hrfData, matchReports);
+
+  return callAICompo(`## EFFECTIF (${hrfData.youthPlayers.length} joueurs)
+
+${playerList}
+
+Plan A refusé.${extra}
+Propose un PLAN B avec approche DIFFÉRENTE. Respecte les catégories (CAT) sans les recalculer.
+
+Réponds UNIQUEMENT avec le JSON :
+{"primaryTraining":"X","secondaryTraining":"Y","trainingJustification":"1 phrase","tactic":"Jeu créatif","formation":"X-X-X","lineup":[{"position":"Poste","playerId":"ID","playerName":"Nom","order":"Normal","reason":"10 mots max"}],"subs":[{"playerName":"Nom","reason":"10 mots max"}],"substitutions":[],"trainingChange":null,"summary":"2 phrases max"}`);
 }
 
 export async function askRecruitment(hrfData, profiles) {

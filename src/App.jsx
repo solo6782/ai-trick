@@ -30,6 +30,7 @@ export default function App() {
   const [scores, setScores] = useState({})
   const [playerHistory, setPlayerHistory] = useState([])
   const [analyzing, setAnalyzing] = useState(false)
+  const [analyzeResult, setAnalyzeResult] = useState(null)
   const [loading, setLoading] = useState(true)
 
   // Calculate scores whenever hrfData changes
@@ -96,6 +97,7 @@ export default function App() {
 
   async function handleAnalyze() {
     setAnalyzing(true)
+    setAnalyzeResult(null)
     try {
       const rawPreds = await askPredictions(hrfData, matchReports)
       const toSave = rawPreds.map(p => ({
@@ -118,9 +120,15 @@ export default function App() {
       await savePredictions(toSave)
       const preds = await loadPredictions()
       setPredictions(preds)
+      // Summary feedback
+      const cats = {}
+      toSave.forEach(p => { const c = p.category || '?'; cats[c] = (cats[c] || 0) + 1 })
+      const summary = Object.entries(cats).map(([k, v]) => `${v} ${k}`).join(', ')
+      setAnalyzeResult(`✅ ${toSave.length} joueurs analysés : ${summary}`)
+      setTimeout(() => setAnalyzeResult(null), 10000)
     } catch (e) {
       console.error('Analyze error:', e)
-      alert('Erreur d\'analyse : ' + e.message)
+      setAnalyzeResult(`❌ ${e.message}`)
     } finally {
       setAnalyzing(false)
     }
@@ -178,6 +186,12 @@ export default function App() {
           Paramètres
         </button>
       </nav>
+
+      {analyzeResult && (
+        <div className={`alert-card ${analyzeResult.startsWith('✅') ? 'alert-success' : 'alert-warning'}`} style={{ margin: '0 0 16px 0' }}>
+          <p>{analyzeResult}</p>
+        </div>
+      )}
 
       {page === 'dashboard' && (
         <>
