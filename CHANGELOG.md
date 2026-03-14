@@ -2,6 +2,14 @@
 
 Toutes les modifications notables de **ai-trick** sont documentées ici.
 
+## [0.9.1] - 2026-03-14
+
+### Corrigé
+- **Bug critique JSON invalide** : `max_tokens` était à 4096 — largement insuffisant pour 14 joueurs avec classifications. Passé à 16384.
+- **API version** mise à jour de `2023-06-01` à `2024-10-22` pour compatibilité Opus 4.6.
+- **Parsing JSON robuste** : gère les cas où Opus ajoute du texte avant/après le JSON, les blocs ``` avec ou sans tag json, le JSON tronqué (tente de refermer les crochets/accolades).
+- Meilleurs messages d'erreur en cas d'échec API.
+
 ## [0.9.0] - 2026-03-14
 
 ### Refonte majeure : Analyse en 2 étapes

@@ -1,6 +1,13 @@
 import { useState, useEffect } from 'react'
 
-const CHANGELOG = `## [0.9.0] - 2026-03-14
+const CHANGELOG = `## [0.9.1] - 2026-03-14
+
+### Corrigé
+- Bug critique : max_tokens trop bas (4096 → 16384), causait des JSON tronqués
+- API version mise à jour pour Opus 4.6
+- Parsing JSON robuste (texte autour, blocs code, troncature)
+
+## [0.9.0] - 2026-03-14
 
 ### Refonte : Analyse en 2 étapes
 - Bouton Analyser = prédictions + classification (STAR/PROSPECT/MYSTÈRE/GOLFEUR/INUTILE)

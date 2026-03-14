@@ -5,10 +5,28 @@ import PitchView from './PitchView'
 
 function parseCompoResponse(raw) {
   try {
-    const jsonMatch = raw.match(/```json\s*([\s\S]*?)```/)
-    if (jsonMatch) return { type: 'json', data: JSON.parse(jsonMatch[1].trim()), raw }
-    const trimmed = raw.trim()
-    if (trimmed.startsWith('{')) return { type: 'json', data: JSON.parse(trimmed), raw }
+    // 1. Try ```json block
+    const jsonBlock = raw.match(/```json\s*([\s\S]*?)```/)
+    if (jsonBlock) return { type: 'json', data: JSON.parse(jsonBlock[1].trim()), raw }
+
+    // 2. Try ``` block
+    const codeBlock = raw.match(/```\s*([\s\S]*?)```/)
+    if (codeBlock) {
+      const inner = codeBlock[1].trim()
+      if (inner.startsWith('{')) return { type: 'json', data: JSON.parse(inner), raw }
+    }
+
+    // 3. Find first { and try to parse
+    const start = raw.indexOf('{')
+    if (start >= 0) {
+      const substr = raw.substring(start)
+      try { return { type: 'json', data: JSON.parse(substr), raw } } catch {}
+      // Try finding last }
+      const lastClose = substr.lastIndexOf('}')
+      if (lastClose > 0) {
+        try { return { type: 'json', data: JSON.parse(substr.substring(0, lastClose + 1)), raw } } catch {}
+      }
+    }
   } catch (e) { console.warn('Could not parse composition JSON:', e) }
   return { type: 'text', raw }
 }

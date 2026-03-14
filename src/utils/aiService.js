@@ -2,6 +2,57 @@ import { buildFullPrompt } from '../data/systemPrompt.js';
 import { loadApiKey, loadCustomNotes, loadPlayerHistory } from './storage.js';
 import { getSkillLabel, getPositionLabel } from './hrfParser.js';
 
+/**
+ * Robust JSON extraction from AI response.
+ * Handles: raw JSON, ```json blocks, text before/after JSON, truncated JSON.
+ */
+function extractJSON(text) {
+  if (!text) return null;
+
+  // 1. Try extracting from ```json block
+  const jsonBlock = text.match(/```json\s*([\s\S]*?)```/);
+  if (jsonBlock) {
+    try { return JSON.parse(jsonBlock[1].trim()); } catch {}
+  }
+
+  // 2. Try extracting from ``` block (without json tag)
+  const codeBlock = text.match(/```\s*([\s\S]*?)```/);
+  if (codeBlock) {
+    try { return JSON.parse(codeBlock[1].trim()); } catch {}
+  }
+
+  // 3. Find the first [ or { and try to parse from there
+  const arrStart = text.indexOf('[');
+  const objStart = text.indexOf('{');
+  const start = arrStart >= 0 && objStart >= 0 ? Math.min(arrStart, objStart)
+    : arrStart >= 0 ? arrStart : objStart;
+
+  if (start >= 0) {
+    const substr = text.substring(start);
+    try { return JSON.parse(substr); } catch {}
+
+    // 4. Try to fix truncated JSON (find last valid closing bracket)
+    const isArray = text[start] === '[';
+    const closer = isArray ? ']' : '}';
+    const lastClose = substr.lastIndexOf(closer);
+    if (lastClose > 0) {
+      try { return JSON.parse(substr.substring(0, lastClose + 1)); } catch {}
+    }
+
+    // 5. Brute force: try adding closing brackets
+    let attempt = substr;
+    for (let i = 0; i < 5; i++) {
+      attempt += closer;
+      try { return JSON.parse(attempt); } catch {}
+    }
+  }
+
+  // 6. Last resort: try the whole thing
+  try { return JSON.parse(text.trim()); } catch {}
+
+  return null;
+}
+
 function formatPlayerForAI(player, history) {
   const skills = Object.entries({
     'Gardien': player.skills.keeper, 'Défense': player.skills.defender,
@@ -80,54 +131,41 @@ async function callAI(userMessage, hrfData, matchReports = {}) {
 export async function askPredictions(hrfData, matchReports) {
   const playerIds = hrfData.youthPlayers.map(p => `${p.id} (${p.name})`);
   const response = await callAI(
-    `Analyse CHAQUE joueur de l'effectif. Pour chacun, tu dois :
-1. Estimer les compétences INCONNUES (current et/ou max) à partir des notes, commentaires, postes occupés
-2. Classifier le joueur dans une catégorie
+    `Analyse CHAQUE joueur de l'effectif. Pour chacun :
+1. Estimer les compétences INCONNUES
+2. Classifier le joueur
 3. Identifier son poste naturel
-4. Lister les compétences qui manquent pour affiner la classification
+4. Lister les compétences manquantes
 
 CATÉGORIES :
-- STAR : max 7+ dans une compétence clé ET compétences secondaires correctes pour ce poste (Passe ≥4 pour attaquant, Construction ≥5 pour milieu, etc.)
-- PROSPECT : joueur prometteur avec marge de progression, profil complet encore bon
-- MYSTERE : peu de compétences révélées, profil incertain, à explorer
-- GOLFEUR : beaucoup de compétences révélées/maxées bas, potentiel faible. Utile pour forcer les révélations des autres. INCLUT les joueurs avec une compétence principale haute mais secondaires MAXÉES bas (ex: Buteur 7 + Passe 2 MAXÉ = GOLFEUR)
-- INUTILE : quasi promu et maxé, blessé longue durée, aucun apport
+- STAR : max 7+ dans compétence clé ET secondaires correctes (Passe ≥4 pour attaquant, Construction ≥5 pour milieu)
+- PROSPECT : prometteur, marge de progression, profil complet bon
+- MYSTERE : peu révélé, profil incertain, à explorer
+- GOLFEUR : compétences révélées/maxées bas. INCLUT les joueurs avec principale haute mais secondaires MAXÉES bas (ex: Buteur 7 + Passe 2 MAXÉ = GOLFEUR)
+- INUTILE : quasi promu maxé, blessé, aucun apport
 
-RAPPEL CRUCIAL : Un joueur avec Buteur max 7 mais Passe max 2 MAXÉ et Ailier max 3 MAXÉ est un GOLFEUR, PAS un prospect/star. Les compétences secondaires du poste comptent autant que la principale.
-
-Réponds UNIQUEMENT avec un bloc JSON valide, sans texte avant ni après.
-Format exact :
-[
-  {
-    "id": "PLAYER_ID",
-    "category": "STAR/PROSPECT/MYSTERE/GOLFEUR/INUTILE",
-    "justification": "Explication concise avec données chiffrées",
-    "naturalPosition": "Poste naturel détecté",
-    "missingSkills": ["Liste des compétences à découvrir en priorité"],
-    "keeper": {"current": null, "max": null, "confidence": "low/medium/high"},
-    "defender": {"current": null, "max": null, "confidence": "low"},
-    "playmaker": {"current": null, "max": null, "confidence": "low"},
-    "winger": {"current": null, "max": null, "confidence": "low"},
-    "passing": {"current": null, "max": null, "confidence": "low"},
-    "scorer": {"current": null, "max": null, "confidence": "low"},
-    "setPieces": {"current": null, "max": null, "confidence": "low"}
-  }
-]
-
-Règles pour les prédictions de compétences :
-- Ne remplis "current" et "max" QUE pour les compétences INCONNUES dans les données HRF
-- Pour les compétences déjà connues, mets null
+CONTRAINTES DE FORMAT CRITIQUES :
+- "justification" : 30 MOTS MAXIMUM. Que les chiffres clés. Ex: "Buteur 5/7, Passe 2/2 MAXÉ → unidimensionnel, invendable"
+- "naturalPosition" : 3 mots max. Ex: "Attaquant", "Milieu", "Ailier"
+- "missingSkills" : max 3 items, noms courts. Ex: ["GK", "CON max", "AIL actuel"]
+- Pour les compétences déjà connues dans le HRF, mets null (pas un objet)
 - Sois conservateur : mieux vaut null qu'une mauvaise prédiction
+- NE PAS ajouter de texte avant ou après le JSON
+
+Réponds UNIQUEMENT avec le JSON, format :
+[{"id":"ID","category":"CAT","justification":"30 mots max","naturalPosition":"Poste","missingSkills":["X"],"keeper":null,"defender":null,"playmaker":null,"winger":null,"passing":null,"scorer":null,"setPieces":null}]
+
+Chaque compétence = null (si connue) ou {"current":N,"max":N,"confidence":"low/medium/high"} (si inconnue et estimable).
 
 Joueurs : ${playerIds.join(', ')}`, hrfData, matchReports);
 
-  try {
-    const cleaned = response.replace(/```json\s*/g, '').replace(/```\s*/g, '').trim();
-    return JSON.parse(cleaned);
-  } catch (e) {
-    console.error('Failed to parse AI predictions:', e, response);
-    throw new Error('L\'IA n\'a pas retourné un format JSON valide. Réessaie.');
+  // Robust JSON extraction
+  const parsed = extractJSON(response);
+  if (!parsed) {
+    console.error('Failed to parse AI predictions. Raw response:', response.substring(0, 500));
+    throw new Error('L\'IA n\'a pas retourné un JSON valide. Réponse tronquée ou format inattendu. Réessaie.');
   }
+  return parsed;
 }
 
 // ── STEP 2: Composition (uses pre-computed classifications) ──

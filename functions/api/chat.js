@@ -24,11 +24,11 @@ export async function onRequestPost(context) {
       headers: {
         'Content-Type': 'application/json',
         'x-api-key': apiKey,
-        'anthropic-version': '2023-06-01'
+        'anthropic-version': '2024-10-22'
       },
       body: JSON.stringify({
         model: 'claude-opus-4-6',
-        max_tokens: 4096,
+        max_tokens: 16384,
         system,
         messages: [{ role: 'user', content: message }]
       })
@@ -37,7 +37,8 @@ export async function onRequestPost(context) {
     const data = await response.json();
 
     if (!response.ok) {
-      return new Response(JSON.stringify({ error: data.error?.message || 'API error' }), {
+      const errMsg = data.error?.message || JSON.stringify(data.error) || `API error ${response.status}`;
+      return new Response(JSON.stringify({ error: errMsg }), {
         status: response.status, headers: CORS
       });
     }
