@@ -98,13 +98,22 @@ export default function PlayerTable({ players, predictions, scores, onSelectPlay
         <tbody>
           {sorted.map(p => {
             const pred = predictions[p.id]?.skills || {};
+            const category = predictions[p.id]?.category;
             const score = scores[p.id] || 0;
+            const catColors = { STAR: '#22c55e', PROSPECT: '#3b82f6', MYSTERE: '#06b6d4', GOLFEUR: '#f59e0b', INUTILE: '#6b7280' };
             return (
               <tr key={p.id} onClick={() => onSelectPlayer(p)}>
                 <td style={{ fontFamily: 'var(--font-mono)', fontSize: '0.82rem', fontWeight: 700, color: getScoreColor(score), textAlign: 'center' }}>
                   {score}
                 </td>
-                <td className="player-name">{p.name}</td>
+                <td className="player-name">
+                  {p.name}
+                  {category && (
+                    <span style={{ marginLeft: 6, fontSize: '0.6rem', fontWeight: 700, padding: '1px 5px', borderRadius: 3, background: catColors[category] || '#6b7280', color: '#000', verticalAlign: 'middle' }}>
+                      {category === 'MYSTERE' ? '?' : category.charAt(0)}
+                    </span>
+                  )}
+                </td>
                 <td className="player-age">{formatAge(p.age, p.ageDays)}</td>
                 <td>{p.specialtyLabel && <span className="tag tag-specialty">{p.specialtyLabel}</span>}</td>
                 <td>{p.isPromotable ? <span className="tag tag-promo-ready">Prêt</span> : <span className="tag-promo-wait">{formatPromotion(p.daysUntilPromotion)}</span>}</td>

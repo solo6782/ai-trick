@@ -9,7 +9,7 @@ export async function onRequestOptions() {
   return new Response(null, { headers: CORS });
 }
 
-// GET /api/predictions — Load all predictions
+// GET /api/predictions — Load all predictions + classifications
 export async function onRequestGet(context) {
   try {
     const { results } = await context.env.DB.prepare(
@@ -18,8 +18,13 @@ export async function onRequestGet(context) {
 
     const preds = {};
     for (const row of results) {
+      const data = JSON.parse(row.predictions);
       preds[row.player_id] = {
-        skills: JSON.parse(row.predictions),
+        skills: data.skills || data, // backward compat: old format had skills directly
+        category: data.category || null,
+        justification: data.justification || null,
+        naturalPosition: data.naturalPosition || null,
+        missingSkills: data.missingSkills || [],
         potentialScore: row.potential_score,
         updatedAt: row.updated_at
       };
@@ -31,7 +36,7 @@ export async function onRequestGet(context) {
   }
 }
 
-// POST /api/predictions — Save predictions for multiple players
+// POST /api/predictions — Save predictions + classifications
 export async function onRequestPost(context) {
   try {
     const { players } = await context.request.json();
@@ -46,7 +51,13 @@ export async function onRequestPost(context) {
     );
 
     const batch = players.map(p =>
-      stmt.bind(p.id, JSON.stringify(p.skills), p.potentialScore)
+      stmt.bind(p.id, JSON.stringify({
+        skills: p.skills || {},
+        category: p.category || null,
+        justification: p.justification || null,
+        naturalPosition: p.naturalPosition || null,
+        missingSkills: p.missingSkills || []
+      }), p.potentialScore || 0)
     );
 
     await context.env.DB.batch(batch);

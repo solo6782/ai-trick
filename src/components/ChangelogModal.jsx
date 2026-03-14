@@ -1,6 +1,15 @@
 import { useState, useEffect } from 'react'
 
-const CHANGELOG = `## [0.8.0] - 2026-03-14
+const CHANGELOG = `## [0.9.0] - 2026-03-14
+
+### Refonte : Analyse en 2 étapes
+- Bouton Analyser = prédictions + classification (STAR/PROSPECT/MYSTÈRE/GOLFEUR/INUTILE)
+- Bouton Composition s'appuie sur les classifications pré-calculées
+- Badges de catégorie dans le tableau et la fiche joueur
+- Poste naturel détecté et compétences à découvrir affichés
+- Avertissement si compo lancée sans analyse
+
+## [0.8.0] - 2026-03-14
 
 ### Changement majeur
 - Passage à Claude Opus 4.6 (meilleur raisonnement, ~20s par analyse)

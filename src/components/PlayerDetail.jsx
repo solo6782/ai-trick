@@ -60,14 +60,34 @@ export default function PlayerDetail({ player, matchReports, predictions, score,
         <div className="detail-header">
           <div>
             <h2>{player.name}</h2>
-            <div style={{ display: 'flex', gap: 8, marginTop: 6, alignItems: 'center' }}>
+            <div style={{ display: 'flex', gap: 8, marginTop: 6, alignItems: 'center', flexWrap: 'wrap' }}>
               {player.specialtyLabel && <span className="tag tag-specialty">{player.specialtyLabel}</span>}
               {score !== undefined && (
                 <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.85rem', fontWeight: 700, color: getScoreColor(score) }}>
                   Potentiel : {score}/100
                 </span>
               )}
+              {predictions?.[player.id]?.category && (() => {
+                const cat = predictions[player.id].category;
+                const colors = { STAR: '#22c55e', PROSPECT: '#3b82f6', MYSTERE: '#06b6d4', GOLFEUR: '#f59e0b', INUTILE: '#6b7280' };
+                return (
+                  <span style={{ fontSize: '0.72rem', fontWeight: 700, padding: '2px 8px', borderRadius: 4, background: colors[cat] || '#6b7280', color: '#000' }}>
+                    {cat}
+                  </span>
+                );
+              })()}
             </div>
+            {predictions?.[player.id]?.justification && (
+              <div style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', marginTop: 6, fontStyle: 'italic' }}>
+                {predictions[player.id].justification}
+                {predictions[player.id].naturalPosition && <> — Poste : <strong>{predictions[player.id].naturalPosition}</strong></>}
+              </div>
+            )}
+            {predictions?.[player.id]?.missingSkills?.length > 0 && (
+              <div style={{ fontSize: '0.72rem', color: 'var(--accent-cyan)', marginTop: 4 }}>
+                À découvrir : {predictions[player.id].missingSkills.join(', ')}
+              </div>
+            )}
           </div>
           <button className="close-btn" onClick={onClose}>✕</button>
         </div>

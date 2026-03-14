@@ -2,6 +2,20 @@
 
 Toutes les modifications notables de **ai-trick** sont documentées ici.
 
+## [0.9.0] - 2026-03-14
+
+### Refonte majeure : Analyse en 2 étapes
+- **Bouton "Analyser"** fait maintenant DEUX choses : prédire les compétences inconnues ET classifier chaque joueur (STAR/PROSPECT/MYSTÈRE/GOLFEUR/INUTILE) avec justification, poste naturel détecté, et compétences manquantes. Tout est sauvegardé en D1.
+- **Bouton "Composition"** s'appuie sur les classifications pré-calculées. L'IA n'a plus à tout analyser d'un coup — elle reçoit les catégories et n'a qu'à placer les joueurs. Résultat bien meilleur.
+- **Avertissement** si on lance la composition sans avoir fait l'analyse d'abord.
+
+### Ajouté
+- **Badges de catégorie** dans le tableau de bord (S=Star, P=Prospect, ?=Mystère, G=Golfeur, I=Inutile) à côté du nom
+- **Catégorie + justification** dans la fiche joueur détaillée (poste naturel, compétences à découvrir)
+- Passage à Claude Opus 4.6 (v0.8.0)
+- Classification obligatoire avant compo (v0.8.0)
+- Composition persistante et noms cliquables (v0.8.0)
+
 ## [0.8.0] - 2026-03-14
 
 ### Changement majeur

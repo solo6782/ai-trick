@@ -98,7 +98,6 @@ export default function App() {
     setAnalyzing(true)
     try {
       const rawPreds = await askPredictions(hrfData, matchReports)
-      // Transform AI response into storage format
       const toSave = rawPreds.map(p => ({
         id: p.id,
         skills: {
@@ -110,6 +109,10 @@ export default function App() {
           scorer: p.scorer || {},
           setPieces: p.setPieces || {}
         },
+        category: p.category || null,
+        justification: p.justification || null,
+        naturalPosition: p.naturalPosition || null,
+        missingSkills: p.missingSkills || [],
         potentialScore: scores[p.id] || 0
       }))
       await savePredictions(toSave)
@@ -206,7 +209,7 @@ export default function App() {
       {showImportHRF && <ImportHRFModal onImport={handleHRFImport} onHistoryImported={async () => { const h = await loadPlayerHistory(); setPlayerHistory(h); }} onClose={() => setShowImportHRF(false)} />}
       {showImportReport && hrfData && <ImportReportModal players={hrfData.youthPlayers} existingReports={matchReports} onSave={handleReportSave} onClose={() => setShowImportReport(false)} />}
       {showRecruitment && <RecruitmentModal hrfData={hrfData} onClose={() => setShowRecruitment(false)} />}
-      {showComposition && <CompositionPanel hrfData={hrfData} matchReports={matchReports} onClose={() => setShowComposition(false)} />}
+      {showComposition && <CompositionPanel hrfData={hrfData} matchReports={matchReports} predictions={predictions} onClose={() => setShowComposition(false)} />}
       {selectedPlayer && <PlayerDetail player={selectedPlayer} matchReports={matchReports} predictions={predictions} score={scores[selectedPlayer.id]} playerHistory={playerHistory} onClose={() => setSelectedPlayer(null)} />}
       {showChangelog && <ChangelogModal onClose={() => setShowChangelog(false)} />}
     </div>

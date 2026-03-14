@@ -171,7 +171,7 @@ function CompoDetails({ data, players, onShowPlayer }) {
   )
 }
 
-export default function CompositionPanel({ hrfData, matchReports, onClose }) {
+export default function CompositionPanel({ hrfData, matchReports, predictions, onClose }) {
   const [parsed, setParsed] = useState(null)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
@@ -195,7 +195,7 @@ export default function CompositionPanel({ hrfData, matchReports, onClose }) {
   async function handleAsk() {
     setLoading(true); setError('')
     try {
-      const raw = await askComposition(hrfData, matchReports)
+      const raw = await askComposition(hrfData, matchReports, predictions)
       const p = parseCompoResponse(raw)
       setParsed(p)
       await saveCompo(p)
@@ -206,7 +206,7 @@ export default function CompositionPanel({ hrfData, matchReports, onClose }) {
   async function handlePlanB() {
     setLoading(true); setError('')
     try {
-      const raw = await askCompositionPlanB(hrfData, matchReports, planBFeedback)
+      const raw = await askCompositionPlanB(hrfData, matchReports, planBFeedback, predictions)
       const p = parseCompoResponse(raw)
       setParsed(p)
       await saveCompo(p)
@@ -222,9 +222,16 @@ export default function CompositionPanel({ hrfData, matchReports, onClose }) {
       <div className="modal" onClick={e => e.stopPropagation()} style={{ width: 860, maxHeight: '90vh' }}>
         <h2>📝 Composition pour le prochain match</h2>
         <p style={{ fontSize: '0.82rem', color: 'var(--text-secondary)', marginBottom: 20 }}>
-          L'IA (Opus) propose la meilleure composition pour maximiser progression et révélations.
+          L'IA (Opus) propose la meilleure composition basée sur les classifications pré-calculées.
           {hrfData && <><br />Entraînement senior : <strong>{hrfData.training.type}</strong> — {hrfData.youthPlayers.length} joueurs.</>}
         </p>
+
+        {(!predictions || !Object.values(predictions).some(p => p.category)) && (
+          <div className="alert-card alert-warning" style={{ marginBottom: 16 }}>
+            <h3>⚠️ Analyse requise</h3>
+            <p>Lance d'abord une analyse (🧠 Analyser) pour classifier les joueurs. La composition sera bien meilleure avec les classifications pré-calculées.</p>
+          </div>
+        )}
 
         {!parsed && !loadingState && (
           <div style={{ textAlign: 'center', padding: '30px 0' }}>
