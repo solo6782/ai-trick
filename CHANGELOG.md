@@ -2,6 +2,18 @@
 
 Toutes les modifications notables de **ai-trick** sont documentées ici.
 
+## [0.8.0] - 2026-03-14
+
+### Changement majeur
+- **Passage à Claude Opus 4.6** — Meilleur raisonnement, meilleur respect des règles complexes. Légèrement plus lent (~20s) mais nettement plus intelligent.
+
+### Ajouté
+- **Classification obligatoire** : avant chaque composition, l'IA doit classer CHAQUE joueur (STAR/PROSPECT/MYSTÈRE/GOLFEUR/INUTILE) avec justification chiffrée. La classification est affichée en haut de la compo avec un code couleur.
+- **Vérification intégrée** : si un GOLFEUR apparaît en poste entraînable ou un MYSTÈRE sur le banc, l'IA doit corriger.
+- **Composition persistante** : la dernière compo est sauvegardée en D1, elle est restaurée à l'ouverture.
+- **Noms cliquables** : dans la compo, cliquer sur un nom de joueur affiche une mini-fiche avec ses compétences.
+- Bouton "Recalculer" pour relancer sans fermer la modale.
+
 ## [0.7.1] - 2026-03-14
 
 ### Corrigé

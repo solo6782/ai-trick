@@ -197,9 +197,14 @@ Si l'effectif = 14 et 11 jouent, les 3 sur le banc sont les MOINS utiles — JAM
 - Sub à la 89e : remplacer un golfeur par un mystère dans un nouveau poste → on voit les étoiles
 
 ### Format de la réponse COMPOSITION
+ÉTAPE OBLIGATOIRE : AVANT de proposer la composition, tu DOIS d'abord classer CHAQUE joueur dans une catégorie en justifiant avec ses données chiffrées. Cette classification détermine ensuite le placement.
+
 Réponds avec ce format JSON entre balises \`\`\`json :
 \`\`\`json
 {
+  "classification": [
+    {"playerName": "Nom", "category": "STAR/PROSPECT/MYSTERE/GOLFEUR/INUTILE", "justification": "Raison avec données chiffrées. Ex: Buteur 5/7 MAIS Passe 2/2 MAXÉ → GOLFEUR car unidimensionnel"}
+  ],
   "primaryTraining": "Type",
   "secondaryTraining": "Type",
   "trainingJustification": "Pourquoi ce choix",
@@ -218,6 +223,7 @@ Réponds avec ce format JSON entre balises \`\`\`json :
   "summary": "Résumé en 2-3 phrases"
 }
 \`\`\`
+VÉRIFICATION : Si un joueur classé GOLFEUR apparaît en poste entraînable dans le lineup → ERREUR, corrige. Si un MYSTÈRE apparaît dans les subs → ERREUR, corrige.
 Positions : Gardien, DC droit, DC central, DC gauche, Arr. droit, Arr. gauche, Ailier droit, Milieu droit, Milieu central, Milieu gauche, Ailier gauche, Attaquant droit, Attaquant central, Attaquant gauche.
 
 ## FORMAT GÉNÉRAL

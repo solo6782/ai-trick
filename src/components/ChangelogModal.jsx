@@ -1,6 +1,18 @@
 import { useState, useEffect } from 'react'
 
-const CHANGELOG = `## [0.7.1] - 2026-03-14
+const CHANGELOG = `## [0.8.0] - 2026-03-14
+
+### Changement majeur
+- Passage à Claude Opus 4.6 (meilleur raisonnement, ~20s par analyse)
+
+### Ajouté
+- Classification obligatoire avant chaque compo (STAR/PROSPECT/MYSTÈRE/GOLFEUR/INUTILE)
+- Vérification : GOLFEUR en poste entraînable ou MYSTÈRE sur banc = erreur corrigée
+- Composition persistante (sauvegardée en D1)
+- Noms cliquables → mini-fiche joueur
+- Bouton "Recalculer"
+
+## [0.7.1] - 2026-03-14
 
 ### Corrigé
 - Bug critique : mystères (15 ans) systématiquement mis sur le banc
