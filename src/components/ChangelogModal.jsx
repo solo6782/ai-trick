@@ -1,6 +1,15 @@
 import { useState, useEffect } from 'react'
 
-const CHANGELOG = `## [0.7.0] - 2026-03-14
+const CHANGELOG = `## [0.7.1] - 2026-03-14
+
+### Corrigé
+- Bug critique : mystères (15 ans) systématiquement mis sur le banc
+- Algorithme de placement refondu : compter, classer, puis réserver les places
+- Mystère JAMAIS sur le banc tant qu'un joueur moins utile est aligné
+- Golfeurs DOIVENT jouer (forcent les révélations)
+- Seuls les "inutiles" (promus maxés, blessés) vont sur le banc
+
+## [0.7.0] - 2026-03-14
 
 ### Refonte majeure du prompt
 - Guide académie intégré (jeu créatif, ordres individuels, sub 89e, malus même entraînement)

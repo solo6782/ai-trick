@@ -2,6 +2,15 @@
 
 Toutes les modifications notables de **ai-trick** sont documentées ici.
 
+## [0.7.1] - 2026-03-14
+
+### Corrigé
+- **Bug critique** : les mystères (jeunes 15 ans) étaient systématiquement mis sur le banc au lieu de jouer
+- Refonte complète de l'algorithme de placement : l'IA doit d'abord compter et classer tous les joueurs, puis réserver les places dans l'ordre Stars → Mystères → Golfeurs → Inutiles sur le banc
+- Règle explicite : un mystère NE VA JAMAIS sur le banc tant qu'il reste un joueur moins utile dans le 11
+- Les golfeurs DOIVENT jouer (en postes morts) car leur présence force le moteur à révéler les compétences des bons joueurs
+- Seuls les joueurs "inutiles" (quasi promus maxés, blessés, à virer) vont sur le banc
+
 ## [0.7.0] - 2026-03-14
 
 ### Refonte majeure du prompt système

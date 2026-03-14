@@ -151,24 +151,50 @@ Formations optimales par combo :
 
 RÈGLE ABSOLUE : Les postes "morts" (gardien sauf si entraînement Gardien, défenseurs sauf si entraînement Défense) sont réservés aux GOLFEURS. JAMAIS un prospect ou un mystère en poste mort.
 
-### Placement des joueurs (par priorité)
+### Qui joue, qui est sur le banc
 
-**Étape 1** : Identifier les STARS et PROSPECTS → les placer aux postes entraînables primaire en priorité
-**Étape 2** : Identifier les MYSTÈRES → les placer aux postes entraînables restants OU à des postes de test (même non entraînables) pour découvrir leur profil. Un mystère qui n'a jamais joué milieu DOIT être testé en milieu.
-**Étape 3** : Remplir les postes morts avec les GOLFEURS
-**Étape 4** : S'il reste des places entraînables → y mettre des mystères supplémentaires plutôt que des golfeurs
+**QUI DOIT TOUJOURS JOUER (les 11 titulaires) :**
+1. STARS et PROSPECTS → postes entraînables (progression)
+2. MYSTÈRES (jeunes 15-16 ans, peu de compétences révélées) → postes de test pour découvrir leur profil. Un mystère NE VA JAMAIS SUR LE BANC tant qu'il reste un joueur moins utile dans le 11.
+3. GOLFEURS → postes morts (gardien, défense). Leur rôle est CRUCIAL : leur présence avec beaucoup de compétences déjà révélées FORCE le moteur à révéler les compétences des bons joueurs dans les rapports coach. Ils DOIVENT jouer.
+
+**QUI VA SUR LE BANC :**
+Uniquement les joueurs qui n'apportent RIEN à cette composition :
+- Un joueur quasi promu et déjà maxé dans tout ce qui est utile
+- Un joueur qui va être viré prochainement (potentiel nul)
+- Un joueur blessé ou suspendu
+Si l'effectif = 14 et 11 jouent, les 3 sur le banc sont les MOINS utiles — JAMAIS les mystères de 15 ans.
+
+### Placement des joueurs (ALGORITHME)
+
+**Étape 1 — Compter et classer tous les joueurs :**
+- Lister les STARS/PROSPECTS (compétence principale max 7+ et secondaires correctes)
+- Lister les MYSTÈRES (peu de compétences connues, jeunes, profil incertain)
+- Lister les GOLFEURS (beaucoup de compétences révélées/maxées, potentiel faible)
+- Lister les INUTILES (quasi promus maxés, blessés, à virer)
+
+**Étape 2 — Réserver les places :**
+- Postes entraînables → STARS/PROSPECTS en priorité, puis MYSTÈRES restants
+- Postes morts (gardien, défenseurs si pas entraînement Défense) → GOLFEURS
+- S'il manque des golfeurs pour les postes morts → y mettre un MYSTÈRE (il verra au moins ses étoiles à ce poste)
+- S'il y a plus de joueurs que de places → les INUTILES vont sur le banc
+
+**Étape 3 — Vérifier :**
+- Tous les mystères jouent ? OUI → OK. NON → retirer un golfeur ou un inutile pour le faire jouer
+- Tous les prospects sont en poste entraînable ? OUI → OK
+- Aucun golfeur n'est en poste entraînable ? OUI → OK
 
 ### Exemples de MAUVAISES décisions
+- Mettre un mystère de 15 ans SUR LE BANC → ERREUR CRITIQUE. C'est le joueur le plus important à faire jouer pour le découvrir
 - Mettre un golfeur (Buteur 5/7, Passe 2/2 MAXÉ) en attaquant → GASPILLAGE de poste entraînable
-- Mettre un mystère de 15 ans sur le banc → on perd une occasion de le découvrir
-- Ne pas tester un joueur dans différents postes → on risque de rater une pépite
+- Aligner 11 joueurs âgés et laisser les 3 mystères de 15 ans sur le banc → ABSURDE
 - Même entraînement primaire et secondaire → malus 20% + bloque les révélations
 
 ### Exemples de BONNES décisions
-- Mystère de 15 ans → le faire jouer même à un poste non entraînable pour voir ses étoiles
-- Golfeur avec Construction maxée, Passe maxée → parfait en gardien ou défenseur (poste mort)
-- Prospect Construction 5/7 + Passe 5/? → milieu central (entraînable)
-- Sub à la 89e min : remplacer un golfeur en défense par un mystère en milieu → on voit les étoiles du mystère dans un nouveau poste
+- Effectif de 14 : 5 prospects + 3 mystères + 4 golfeurs + 2 inutiles → les 2 inutiles sur le banc, tout le monde joue
+- Mystère de 15 ans → le mettre en milieu pour tester, même si le poste n'est pas entraînable
+- Golfeur avec tout maxé → gardien (poste mort, il force les révélations par sa présence)
+- Sub à la 89e : remplacer un golfeur par un mystère dans un nouveau poste → on voit les étoiles
 
 ### Format de la réponse COMPOSITION
 Réponds avec ce format JSON entre balises \`\`\`json :
