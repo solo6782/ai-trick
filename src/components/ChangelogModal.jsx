@@ -1,6 +1,14 @@
 import { useState, useEffect } from 'react'
 
-const CHANGELOG = `## [0.9.2] - 2026-03-14
+const CHANGELOG = `## [0.9.3] - 2026-03-18
+
+### Amélioré
+- Promotions/Licenciements repliés par défaut
+- Date de dernière analyse dans : dashboard, compo, promotions, licenciements
+- Date de dernière composition dans la modale compo
+- Changelog d'analyse dépliable : changements de catégorie, prédictions, poste naturel
+
+## [0.9.2] - 2026-03-14
 
 ### Corrigé
 - Compo ne re-analyse plus : reçoit uniquement les classifications + résumé compact

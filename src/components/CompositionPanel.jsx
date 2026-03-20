@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import { askComposition, askCompositionPlanB } from '../utils/aiService'
 import { saveSetting, loadSettings } from '../utils/storage'
+import { formatDateFR } from '../utils/hrfParser'
 import PitchView from './PitchView'
 
 function parseCompoResponse(raw) {
@@ -196,18 +197,27 @@ export default function CompositionPanel({ hrfData, matchReports, predictions, o
   const [planBFeedback, setPlanBFeedback] = useState('')
   const [miniPlayer, setMiniPlayer] = useState(null)
   const [loadingState, setLoadingState] = useState(true)
+  const [analysisDate, setAnalysisDate] = useState(null)
+  const [compoDate, setCompoDate] = useState(null)
 
-  // Load saved composition on mount
+  // Load saved composition and dates on mount
   useEffect(() => {
     loadSettings().then(s => {
       if (s.last_composition) {
         try { setParsed(JSON.parse(s.last_composition)) } catch {}
       }
+      if (s.last_composition_date) setCompoDate(s.last_composition_date)
+      if (s.analysis_date) setAnalysisDate(s.analysis_date)
     }).finally(() => setLoadingState(false))
   }, [])
 
   async function saveCompo(p) {
-    try { await saveSetting('last_composition', JSON.stringify(p)) } catch {}
+    const now = new Date().toISOString()
+    try {
+      await saveSetting('last_composition', JSON.stringify(p))
+      await saveSetting('last_composition_date', now)
+      setCompoDate(now)
+    } catch {}
   }
 
   async function handleAsk() {
@@ -239,10 +249,14 @@ export default function CompositionPanel({ hrfData, matchReports, predictions, o
     <div className="modal-overlay" onClick={onClose}>
       <div className="modal" onClick={e => e.stopPropagation()} style={{ width: 860, maxHeight: '90vh' }}>
         <h2>📝 Composition pour le prochain match</h2>
-        <p style={{ fontSize: '0.82rem', color: 'var(--text-secondary)', marginBottom: 20 }}>
+        <p style={{ fontSize: '0.82rem', color: 'var(--text-secondary)', marginBottom: 12 }}>
           L'IA (Opus) propose la meilleure composition basée sur les classifications pré-calculées.
           {hrfData && <><br />Entraînement senior : <strong>{hrfData.training.type}</strong> — {hrfData.youthPlayers.length} joueurs.</>}
         </p>
+        <div style={{ display: 'flex', gap: 16, marginBottom: 16, fontSize: '0.72rem', color: 'var(--text-muted)' }}>
+          <span>🧠 Dernière analyse : {analysisDate ? <strong style={{ color: 'var(--accent-cyan)' }}>{formatDateFR(analysisDate)}</strong> : <span style={{ color: 'var(--accent-orange)' }}>aucune</span>}</span>
+          <span>📝 Dernière compo : {compoDate ? <strong style={{ color: 'var(--accent-purple)' }}>{formatDateFR(compoDate)}</strong> : <span style={{ color: 'var(--text-muted)' }}>aucune</span>}</span>
+        </div>
 
         {(!predictions || !Object.values(predictions).some(p => p.category)) && (
           <div className="alert-card alert-warning" style={{ marginBottom: 16 }}>

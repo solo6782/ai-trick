@@ -2,6 +2,14 @@
 
 Toutes les modifications notables de **ai-trick** sont documentées ici.
 
+## [0.9.3] - 2026-03-18
+
+### Amélioré
+- **Promotions/Licenciements repliés par défaut** à l'ouverture du site
+- **Date de dernière analyse** affichée dans : section Analyse (dashboard), modale Composition, panneaux Promotions/Licenciements
+- **Date de dernière composition** affichée dans la modale Composition
+- **Changelog d'analyse** : section dépliable sur le dashboard qui montre les changements depuis la dernière analyse (changements de catégorie, nouvelles prédictions de compétences, changements de poste naturel)
+
 ## [0.9.2] - 2026-03-14
 
 ### Corrigé

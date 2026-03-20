@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
-import { parseHRF } from './utils/hrfParser'
-import { loadHRFData, saveHRFData, loadMatchReports, saveMatchReport, deleteMatchReport, loadSettings, loadPredictions, savePredictions, loadPlayerHistory } from './utils/storage'
+import { parseHRF, formatDateFR } from './utils/hrfParser'
+import { loadHRFData, saveHRFData, loadMatchReports, saveMatchReport, deleteMatchReport, loadSettings, saveSetting, loadPredictions, savePredictions, loadPlayerHistory } from './utils/storage'
 import { calculatePotentialScore } from './utils/scoreCalculator'
 import { askPredictions } from './utils/aiService'
 import { VERSION } from './version'
@@ -14,6 +14,46 @@ import AIAlerts from './components/AIAlerts'
 import ReportsPage from './components/ReportsPage'
 import ChangelogModal from './components/ChangelogModal'
 import Settings from './components/Settings'
+
+// Generate diff between old and new predictions
+function generateAnalysisChangelog(oldPreds, newPreds, players) {
+  const changes = [];
+  for (const p of players) {
+    const oldP = oldPreds[p.id] || {};
+    const newP = newPreds.find(n => n.id === p.id) || {};
+    const name = p.name;
+
+    // Category change
+    if (oldP.category && newP.category && oldP.category !== newP.category) {
+      changes.push({ type: 'category', icon: '🔄', text: `${name} : ${oldP.category} → ${newP.category}`, detail: newP.justification || '' });
+    } else if (!oldP.category && newP.category) {
+      changes.push({ type: 'category', icon: '🆕', text: `${name} : classifié ${newP.category}`, detail: newP.justification || '' });
+    }
+
+    // Skill predictions changed
+    const skillNames = { keeper: 'GK', defender: 'DEF', playmaker: 'CON', winger: 'AIL', passing: 'PAS', scorer: 'BUT', setPieces: 'CF' };
+    for (const [key, label] of Object.entries(skillNames)) {
+      const oldS = oldP.skills?.[key] || {};
+      const newS = newP[key] || {};
+      if (!newS || !newS.current && !newS.max) continue;
+
+      if (newS.current && (!oldS.current || oldS.current !== newS.current)) {
+        const arrow = oldS.current ? `~${oldS.current} → ~${newS.current}` : `? → ~${newS.current}`;
+        changes.push({ type: 'skill', icon: '📊', text: `${name} : ${label} actuel ${arrow}`, detail: `Confiance: ${newS.confidence || '?'}` });
+      }
+      if (newS.max && (!oldS.max || oldS.max !== newS.max)) {
+        const arrow = oldS.max ? `~${oldS.max} → ~${newS.max}` : `? → ~${newS.max}`;
+        changes.push({ type: 'skill', icon: '📊', text: `${name} : ${label} max ${arrow}`, detail: `Confiance: ${newS.confidence || '?'}` });
+      }
+    }
+
+    // Natural position changed
+    if (oldP.naturalPosition && newP.naturalPosition && oldP.naturalPosition !== newP.naturalPosition) {
+      changes.push({ type: 'position', icon: '📍', text: `${name} : poste ${oldP.naturalPosition} → ${newP.naturalPosition}` });
+    }
+  }
+  return changes;
+}
 
 export default function App() {
   const [page, setPage] = useState('dashboard')
@@ -31,6 +71,9 @@ export default function App() {
   const [playerHistory, setPlayerHistory] = useState([])
   const [analyzing, setAnalyzing] = useState(false)
   const [analyzeResult, setAnalyzeResult] = useState(null)
+  const [analysisDate, setAnalysisDate] = useState(null)
+  const [analysisLog, setAnalysisLog] = useState([])
+  const [analysisLogOpen, setAnalysisLogOpen] = useState(false)
   const [loading, setLoading] = useState(true)
 
   // Calculate scores whenever hrfData changes
@@ -55,6 +98,10 @@ export default function App() {
         if (reports) setMatchReports(reports)
         if (preds) setPredictions(preds)
         if (history) setPlayerHistory(history)
+        if (settings?.analysis_date) setAnalysisDate(settings.analysis_date)
+        if (settings?.analysis_log) {
+          try { setAnalysisLog(JSON.parse(settings.analysis_log)) } catch {}
+        }
         setHasApiKey(!!settings?.api_key)
       } catch (e) {
         console.error('Init error:', e)
@@ -117,15 +164,27 @@ export default function App() {
         missingSkills: p.missingSkills || [],
         potentialScore: scores[p.id] || 0
       }))
+
+      // Generate changelog by comparing old vs new
+      const changelog = generateAnalysisChangelog(predictions, rawPreds, hrfData.youthPlayers)
+      const now = new Date().toISOString()
+
       await savePredictions(toSave)
+      await saveSetting('analysis_date', now)
+      await saveSetting('analysis_log', JSON.stringify(changelog))
+
       const preds = await loadPredictions()
       setPredictions(preds)
+      setAnalysisDate(now)
+      setAnalysisLog(changelog)
+
       // Summary feedback
       const cats = {}
       toSave.forEach(p => { const c = p.category || '?'; cats[c] = (cats[c] || 0) + 1 })
       const summary = Object.entries(cats).map(([k, v]) => `${v} ${k}`).join(', ')
-      setAnalyzeResult(`✅ ${toSave.length} joueurs analysés : ${summary}`)
-      setTimeout(() => setAnalyzeResult(null), 10000)
+      const changesCount = changelog.length
+      setAnalyzeResult(`✅ ${toSave.length} joueurs analysés : ${summary}${changesCount > 0 ? ` — ${changesCount} changement${changesCount > 1 ? 's' : ''} détecté${changesCount > 1 ? 's' : ''}` : ' — première analyse'}`)
+      setTimeout(() => setAnalyzeResult(null), 15000)
     } catch (e) {
       console.error('Analyze error:', e)
       setAnalyzeResult(`❌ ${e.message}`)
@@ -205,6 +264,28 @@ export default function App() {
           ) : (
             <>
               <AIAlerts hrfData={hrfData} matchReports={matchReports} />
+
+              {/* Analysis status section */}
+              <div className="alert-card" style={{ marginBottom: 20, borderColor: 'var(--accent-cyan)', background: 'rgba(6,182,212,0.05)' }}>
+                <h3 style={{ cursor: analysisLog.length > 0 ? 'pointer' : 'default', display: 'flex', alignItems: 'center' }}
+                    onClick={() => analysisLog.length > 0 && setAnalysisLogOpen(o => !o)}>
+                  🧠 Analyse des joueurs
+                  {analysisDate && <span style={{ fontSize: '0.68rem', color: 'var(--text-muted)', fontStyle: 'italic', marginLeft: 8 }}>({formatDateFR(analysisDate)})</span>}
+                  {!analysisDate && <span style={{ fontSize: '0.72rem', color: 'var(--accent-orange)', marginLeft: 8 }}>— Aucune analyse effectuée</span>}
+                  {analysisLog.length > 0 && <span style={{ marginLeft: 8, fontSize: '0.75rem', color: 'var(--text-muted)' }}>{analysisLogOpen ? '▼' : '▶'} {analysisLog.length} changement{analysisLog.length > 1 ? 's' : ''}</span>}
+                </h3>
+                {analysisLogOpen && analysisLog.length > 0 && (
+                  <div style={{ marginTop: 8 }}>
+                    {analysisLog.map((c, i) => (
+                      <div key={i} style={{ fontSize: '0.78rem', padding: '4px 0', borderBottom: '1px solid var(--border)', display: 'flex', gap: 8 }}>
+                        <span>{c.icon}</span>
+                        <span style={{ color: 'var(--text-bright)' }}>{c.text}</span>
+                        {c.detail && <span style={{ color: 'var(--text-muted)', fontSize: '0.72rem' }}>— {c.detail}</span>}
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
 
               <div className="alert-card alert-info" style={{ marginBottom: 20 }}>
                 <h3>🏋️ Entraînement senior : {hrfData.training.type} — Intensité {hrfData.training.level}% — Endurance {hrfData.training.staminaPart}%</h3>
