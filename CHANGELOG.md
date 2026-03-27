@@ -2,6 +2,16 @@
 
 Toutes les modifications notables de **ai-trick** sont documentées ici.
 
+## [0.9.8] - 2026-03-27
+
+### Corrigé
+- **Bug critique du filtre temps** : quand le current d'une compétence était inconnu (null dans le HRF), le filtre ne s'appliquait jamais. Maintenant :
+  - Utilise la prédiction de l'IA comme fallback pour le current
+  - Si current toujours inconnu à 17+ ans → considéré "trop tard" (le joueur n'a pas été entraîné)
+- **Règle promouvable** : un joueur "Prêt" (promouvable) ne peut jamais être STAR — au mieux PROSPECT. Il doit être promu, pas entraîné.
+- **Règle max 7 HRF** : STAR exige un max ≥ 7 **confirmé par le HRF** (pas juste estimé par l'IA).
+- **Filtre secondaires** : ne nécessite plus `maxReached` — si max ≤ 3 dans une secondaire, c'est suffisant pour forcer GOLFEUR.
+
 ## [0.9.7] - 2026-03-27
 
 ### Corrigé

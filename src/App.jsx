@@ -155,55 +155,78 @@ export default function App() {
       let forced = null;
       let reason = '';
 
-      // Find main skill (highest max)
-      const skillEntries = [
-        { name: 'GK', key: 'keeper', s: skills.keeper },
-        { name: 'DEF', key: 'defender', s: skills.defender },
-        { name: 'CON', key: 'playmaker', s: skills.playmaker },
-        { name: 'AIL', key: 'winger', s: skills.winger },
-        { name: 'PAS', key: 'passing', s: skills.passing },
-        { name: 'BUT', key: 'scorer', s: skills.scorer },
-      ];
+      // Build skill entries with AI prediction fallback for current
+      const skillKeys = ['keeper', 'defender', 'playmaker', 'winger', 'passing', 'scorer'];
+      const skillNames = { keeper: 'GK', defender: 'DEF', playmaker: 'CON', winger: 'AIL', passing: 'PAS', scorer: 'BUT' };
 
+      const skillEntries = skillKeys.map(key => {
+        const s = skills[key];
+        const aiPred = pred[key];
+        // Use HRF current if available, otherwise use AI prediction
+        const current = s.current !== null ? s.current : (aiPred?.current ?? null);
+        const max = s.max !== null ? s.max : (aiPred?.max ?? null);
+        return { name: skillNames[key], key, max, current, maxReached: s.maxReached, hrfMax: s.max };
+      });
+
+      // Find main skill (highest max known from HRF or AI)
       const bestSkill = skillEntries.reduce((best, e) => {
-        const max = e.s.max ?? 0;
-        return max > (best.s.max ?? 0) ? e : best;
+        return (e.max ?? 0) > (best.max ?? 0) ? e : best;
       }, skillEntries[0]);
 
-      const mainMax = bestSkill.s.max;
-      const mainCurrent = bestSkill.s.current;
-      const upsRemaining = (mainMax !== null && mainCurrent !== null) ? mainMax - mainCurrent : null;
+      const mainMax = bestSkill.max;
+      const mainCurrent = bestSkill.current;
+
+      // Calculate ups remaining
+      let upsRemaining = null;
+      if (mainMax !== null && mainCurrent !== null) {
+        upsRemaining = mainMax - mainCurrent;
+      } else if (mainMax !== null && mainCurrent === null && age >= 17) {
+        // Current still unknown at 17+ → player hasn't been trained in this skill
+        // = at best current is low, so many ups remaining = too late
+        upsRemaining = 99; // force "trop tard"
+      }
 
       // RULE 1: Age >= 17 AND 2+ ups remaining → GOLFEUR
       if (age >= 17 && upsRemaining !== null && upsRemaining >= 2) {
         forced = 'GOLFEUR';
-        reason = `${age}a ${player.ageDays}j, ${bestSkill.name} ${mainCurrent}/${mainMax}=${upsRemaining} ups, trop tard→golfeur (forcé par code)`;
+        const curDisplay = mainCurrent !== null ? mainCurrent : '?';
+        reason = `${age}a ${player.ageDays}j, ${bestSkill.name} ${curDisplay}/${mainMax}=${upsRemaining >= 99 ? '?' : upsRemaining} ups, trop tard (forcé)`;
       }
 
       // RULE 2: Secondaries for natural position maxed ≤ 3
       if (!forced) {
         const posChecks = {
-          scorer: [skills.passing, skills.winger],      // Attaquant needs Passe + Ailier
-          playmaker: [skills.passing, skills.defender],  // Milieu needs Passe + Défense
-          winger: [skills.playmaker, skills.passing],    // Ailier needs Construction + Passe
-          defender: [skills.playmaker],                  // Défenseur needs Construction
+          scorer: ['passing', 'winger'],
+          playmaker: ['passing', 'defender'],
+          winger: ['playmaker', 'passing'],
+          defender: ['playmaker'],
         };
 
-        const secondaries = posChecks[bestSkill.key] || [];
-        const badSecondaries = secondaries.filter(s => s.max !== null && s.max <= 3 && s.maxReached);
+        const checksKeys = posChecks[bestSkill.key] || [];
+        const badSecondaries = checksKeys.filter(k => {
+          const e = skillEntries.find(se => se.key === k);
+          return e && e.max !== null && e.max <= 3;
+        });
 
         if (badSecondaries.length > 0) {
           forced = 'GOLFEUR';
-          reason = `${age}a, secondaires maxées ≤3 pour ${bestSkill.name}→golfeur (forcé par code)`;
+          const badNames = badSecondaries.map(k => skillNames[k]).join('+');
+          reason = `${age}a, ${badNames} max≤3 pour poste ${bestSkill.name} (forcé)`;
         }
       }
 
-      // RULE 3: No skill with max >= 7 → never STAR
-      if (!forced && (pred.category === 'STAR')) {
-        const hasMax7 = skillEntries.some(e => e.s.max !== null && e.s.max >= 7);
+      // RULE 3: Promouvable ("Prêt") → never STAR, at best PROSPECT
+      if (!forced && pred.category === 'STAR' && player.isPromotable) {
+        forced = 'PROSPECT';
+        reason = `Promouvable (Prêt), ne peut pas être STAR — promouvoir ou continuer (forcé)`;
+      }
+
+      // RULE 4: No skill with max >= 7 (HRF confirmed) → never STAR
+      if (!forced && pred.category === 'STAR') {
+        const hasMax7 = skillEntries.some(e => e.hrfMax !== null && e.hrfMax >= 7);
         if (!hasMax7) {
           forced = 'PROSPECT';
-          reason = `Aucune compétence max≥7, ne peut pas être STAR (forcé par code)`;
+          reason = `Aucune compétence max≥7 confirmée par HRF (forcé)`;
         }
       }
 

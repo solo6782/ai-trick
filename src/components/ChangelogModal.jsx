@@ -1,6 +1,15 @@
 import { useState, useEffect } from 'react'
 
-const CHANGELOG = `## [0.9.7] - 2026-03-27
+const CHANGELOG = `## [0.9.8] - 2026-03-27
+
+### Corrigé
+- Bug filtre temps : current null dans HRF → utilise prédiction IA comme fallback
+- Current inconnu à 17+ ans = trop tard (pas entraîné)
+- Promouvable ("Prêt") = jamais STAR, au mieux PROSPECT
+- STAR exige max≥7 confirmé par HRF (pas estimation IA)
+- Secondaires max≤3 = GOLFEUR (même sans maxReached)
+
+## [0.9.7] - 2026-03-27
 
 ### Corrigé
 - Classification forcée côté CODE (l'IA ne peut plus contourner) :
