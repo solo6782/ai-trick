@@ -136,26 +136,27 @@ export async function askPredictions(hrfData, matchReports) {
   const response = await callAI(
     `Analyse CHAQUE joueur de l'effectif. Pour chacun :
 1. Estimer les compétences INCONNUES
-2. Classifier le joueur
+2. Classifier le joueur (POTENTIEL × TEMPS RESTANT)
 3. Identifier son poste naturel
 4. Lister les compétences manquantes
 
-CATÉGORIES :
-- STAR : max 7+ dans compétence clé ET secondaires correctes (Passe ≥4 pour attaquant, Construction ≥5 pour milieu)
-- PROSPECT : prometteur, marge de progression, profil complet bon
-- MYSTERE : peu révélé, profil incertain, à explorer
-- GOLFEUR : compétences révélées/maxées bas. INCLUT les joueurs avec principale haute mais secondaires MAXÉES bas (ex: Buteur 7 + Passe 2 MAXÉ = GOLFEUR)
-- INUTILE : quasi promu maxé, blessé, aucun apport
+CATÉGORIES (le TEMPS est aussi important que le POTENTIEL) :
+- STAR : max 7+ ET secondaires correctes ET TEMPS SUFFISANT pour maxer (≤16 ans, ou 17 ans avec max 1 niveau restant). L'entraînement tourne autour d'eux.
+- PROSPECT : bon potentiel mais temps serré (17 ans avec 2+ niveaux) ou secondaires incertaines. Mérite de jouer mais pas LA priorité.
+- MYSTERE : peu révélé, profil incertain, jeune (15-16 ans). À explorer en priorité.
+- GOLFEUR : secondaires maxées bas, OU potentiel faible, OU TROP TARD (17+ ans avec 2+ niveaux restants = ne sera jamais maxé). Mentionner "trop tard" dans la justification si applicable. Utile pour forcer les révélations.
+- INUTILE : aucun apport (ni golfeur utile, ni mystère)
 
-CONTRAINTES DE FORMAT CRITIQUES :
-- "justification" : 30 MOTS MAXIMUM. Que les chiffres clés. Ex: "Buteur 5/7, Passe 2/2 MAXÉ → unidimensionnel, invendable"
-- "naturalPosition" : 3 mots max. Ex: "Attaquant", "Milieu", "Ailier"
-- "missingSkills" : max 3 items, noms courts. Ex: ["GK", "CON max", "AIL actuel"]
-- Pour les compétences déjà connues dans le HRF, mets null (pas un objet)
-- Sois conservateur : mieux vaut null qu'une mauvaise prédiction
+RAPPEL : 1 up ≈ 1 saison (16 semaines). Un joueur de 17a avec Construction 4/7 (3 niveaux restants) = TROP TARD, c'est un GOLFEUR même si max 7.
+
+CONTRAINTES DE FORMAT :
+- "justification" : 30 MOTS MAX. Inclure l'âge et le temps restant. Ex: "17a, Construction 4/7, 3 ups restants → trop tard, golfeur"
+- "naturalPosition" : 3 mots max
+- "missingSkills" : max 3 items courts
+- Compétences déjà connues = null
 - NE PAS ajouter de texte avant ou après le JSON
 
-Réponds UNIQUEMENT avec le JSON, format :
+Réponds UNIQUEMENT avec le JSON :
 [{"id":"ID","category":"CAT","justification":"30 mots max","naturalPosition":"Poste","missingSkills":["X"],"keeper":null,"defender":null,"playmaker":null,"winger":null,"passing":null,"scorer":null,"setPieces":null}]
 
 Chaque compétence = null (si connue) ou {"current":N,"max":N,"confidence":"low/medium/high"} (si inconnue et estimable).

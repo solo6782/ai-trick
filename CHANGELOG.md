@@ -2,6 +2,15 @@
 
 Toutes les modifications notables de **ai-trick** sont documentées ici.
 
+## [0.9.5] - 2026-03-27
+
+### Amélioré
+- **Classification POTENTIEL × TEMPS** : un joueur 17+ ans avec 2+ niveaux à monter dans sa compétence clé est classifié GOLFEUR (trop tard), même avec un max élevé. STAR réservé aux joueurs ≤16 ans ou 17 ans avec max 1 niveau restant.
+- **Promotions** : joueur "trop tard" + promouvable → PROMOUVOIR MAINTENANT pour récupérer la valeur résiduelle. Jeune STAR → ATTENDRE.
+- **Licenciements** : joueur "trop tard" sans compétences révélées = licencier. "Trop tard" avec beaucoup de compétences révélées = garder comme golfeur.
+- **Composition** : postes entraînables réservés en priorité aux jeunes (15-16 ans) qui ont le temps. Les "trop tard" vont en poste mort même avec un bon max.
+- Prompt système et prompt d'analyse mis à jour avec les nouvelles règles.
+
 ## [0.9.4] - 2026-03-18
 
 ### Corrigé

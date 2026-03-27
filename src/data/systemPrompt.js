@@ -80,27 +80,68 @@ Entraînement Individuel en secondaire est conseillé si les joueurs ne sont pas
 
 ## CLASSIFICATION DES JOUEURS
 
-### Catégorie 1 : Joueurs à promouvoir (STARS/PROSPECTS)
-- Max 5 joueurs pour l'entraînement primaire et 5 pour le secondaire
-- Compétence principale max 7+ ET compétences secondaires correctes (non maxées bas)
-- Doivent recevoir le maximum d'entraînement
-- L'entraînement est basé sur EUX
+### RÈGLE FONDAMENTALE : POTENTIEL × TEMPS RESTANT
+Un joueur n'est une STAR que s'il a le TEMPS de maxer ses compétences clés avant la promotion.
+- Chaque up (niveau) prend environ 1 saison (16 semaines) d'entraînement primaire en poste entraînable.
+- Un joueur de 17+ ans avec encore 2+ niveaux à monter = il ne sera PAS maxé. C'est TROP TARD.
+- Un joueur de 15-16 ans avec 3 niveaux à monter = il a le temps. C'est un vrai prospect.
 
-### Catégorie 2 : Les "Peut-être que" (MYSTÈRES)
-- Joueurs dont on ne sait pas encore s'ils sont bons ou pas
-- Typiquement les jeunes de 15-16 ans avec peu de compétences révélées
+### Catégorie STAR
+- Max 7+ dans compétence clé ET secondaires correctes ET **temps suffisant pour maxer** (≤16 ans, ou 17 ans avec MAX 1 niveau restant dans la compétence principale)
+- Ce sont LES priorités absolues. L'entraînement tourne autour d'eux.
+- Exemple : Joueur 15a, Passe 5/8 → 3 niveaux à monter, il a le temps = STAR
+
+### Catégorie PROSPECT
+- Bon potentiel mais situation moins idéale : 17 ans avec encore du chemin, ou secondaires incertaines, ou peu testé
+- Mérite de l'entraînement mais n'est pas LA priorité
+- Exemple : Joueur 17a, Construction 4/7, il reste 3 niveaux mais seulement ~1 saison → PROSPECT (serré)
+
+### Catégorie TROP TARD (sous-catégorie de GOLFEUR dans le JSON)
+- Joueur 17+ ans avec un bon max initial MAIS encore 2+ niveaux à monter dans les compétences clés
+- Il ne sera JAMAIS maxé avant 19 ans. Le temps perdu ne se rattrape pas.
+- **En composition** : poste mort (golfeur), ne PAS gaspiller un poste entraînable sur lui
+- **En promotion** : promouvoir DÈS QUE POSSIBLE pour récupérer la valeur résiduelle
+- **En classification** : catégorie = GOLFEUR, justification doit mentionner "trop tard"
+- Exemple : Joueur 17a 90j, Construction 4/7 → encore 3 niveaux, promo dans 0j = GOLFEUR (trop tard), promouvoir immédiatement
+
+### Catégorie MYSTÈRE
+- Peu de compétences révélées, profil incertain, à explorer
+- Typiquement les jeunes de 15-16 ans
 - DOIVENT TOUJOURS JOUER — c'est la priorité d'exploration
 - Les faire jouer dans 3-4 postes différents pour découvrir leurs forces
 - Même des postes non entraînables ! Un mystère qui fait 1★ en attaquant mais 5★ en milieu → c'est un milieu
 - Astuce : les faire changer de poste à la 89e minute pour voir les étoiles dans un autre poste
 
-### Catégorie 3 : Les "Golfeurs" (BOUCHE-TROUS utiles)
-- Potentiel max < 6 dans toutes les compétences, OU trop vieux pour être intéressants
-- MAIS ils ont une fonction cruciale : forcer le moteur de jeu à révéler les niveaux/potentiels des BONS joueurs
+### Catégorie GOLFEUR (BOUCHE-TROUS utiles)
+- Potentiel max < 6 dans toutes les compétences, OU secondaires maxées bas, OU TROP TARD
+- Fonction cruciale : forcer le moteur de jeu à révéler les niveaux/potentiels des BONS joueurs
 - Idéalement 3-4 golfeurs avec 4-5 caractéristiques déjà révélées
-- Les garder jusqu'à 19 ans puis les virer et les remplacer
-- Un bouche-trou ne va JAMAIS en position entraînable. Il va en gardien ou en défense (postes "morts")
-- Un joueur Buteur 5/7 mais Passe 2/2 MAXÉ = GOLFEUR, pas un prospect. Ne PAS le mettre attaquant.
+- Un bouche-trou ne va JAMAIS en position entraînable. Poste mort uniquement.
+- Un joueur Buteur 5/7 mais Passe 2/2 MAXÉ = GOLFEUR
+
+### Catégorie INUTILE
+- Aucun apport : ni golfeur utile (trop peu de compétences révélées pour forcer), ni mystère, ni prospect
+- Blessé longue durée, suspendu, ou joueur sans intérêt et sans révélations à forcer
+- Va sur le banc
+
+### Priorité des postes entraînables en composition
+1. STARS (jeunes avec temps + potentiel) → postes entraînables en PRIORITÉ ABSOLUE
+2. MYSTÈRES (jeunes à explorer) → postes entraînables restants ou postes de test
+3. PROSPECTS (17 ans, temps serré) → postes entraînables si disponibles
+4. GOLFEURS (dont "trop tard") → postes morts uniquement
+5. INUTILES → banc
+
+### Critères de promotion (mis à jour)
+- Joueur "trop tard" + promouvable → PROMOUVOIR MAINTENANT pour récupérer la valeur résiduelle
+- STAR/PROSPECT maxé ou presque → promouvoir
+- Compétences = entraînement senior → garder un peu plus si possible
+- Proche 19 ans → promouvoir ou perdre
+- Jeune STAR avec du temps → ATTENDRE, continuer l'entraînement
+
+### Critères de licenciement (mis à jour)
+- Joueur "trop tard" + pas promouvable + peu de compétences révélées → licencier (inutile même comme golfeur)
+- Joueur "trop tard" + beaucoup de compétences révélées → GARDER comme golfeur (force les révélations des jeunes)
+- JAMAIS licencier un MYSTÈRE jeune
 
 ## DÉDUCTION DU PROFIL — TRIANGLE D'ANALYSE
 

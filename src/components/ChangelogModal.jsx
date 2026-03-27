@@ -1,6 +1,14 @@
 import { useState, useEffect } from 'react'
 
-const CHANGELOG = `## [0.9.4] - 2026-03-18
+const CHANGELOG = `## [0.9.5] - 2026-03-27
+
+### Amélioré
+- Classification POTENTIEL × TEMPS : 17+ ans + 2 niveaux restants = GOLFEUR (trop tard)
+- STAR réservé aux ≤16 ans ou 17 ans avec max 1 niveau restant
+- Promotions : "trop tard" → promouvoir immédiatement pour valeur résiduelle
+- Composition : postes entraînables réservés aux jeunes avec du temps
+
+## [0.9.4] - 2026-03-18
 
 ### Corrigé
 - Timeout Cloudflare (erreur 524) : promotions/licenciements/recrutement → Sonnet (rapide)
