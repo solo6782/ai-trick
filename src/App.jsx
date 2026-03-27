@@ -142,12 +142,89 @@ export default function App() {
     setMatchReports(reports)
   }
 
+  // Force classification rules that the AI keeps ignoring
+  function enforceClassification(rawPreds) {
+    if (!hrfData?.youthPlayers) return rawPreds;
+
+    return rawPreds.map(pred => {
+      const player = hrfData.youthPlayers.find(p => p.id === pred.id);
+      if (!player) return pred;
+
+      const age = player.age;
+      const skills = player.skills;
+      let forced = null;
+      let reason = '';
+
+      // Find main skill (highest max)
+      const skillEntries = [
+        { name: 'GK', key: 'keeper', s: skills.keeper },
+        { name: 'DEF', key: 'defender', s: skills.defender },
+        { name: 'CON', key: 'playmaker', s: skills.playmaker },
+        { name: 'AIL', key: 'winger', s: skills.winger },
+        { name: 'PAS', key: 'passing', s: skills.passing },
+        { name: 'BUT', key: 'scorer', s: skills.scorer },
+      ];
+
+      const bestSkill = skillEntries.reduce((best, e) => {
+        const max = e.s.max ?? 0;
+        return max > (best.s.max ?? 0) ? e : best;
+      }, skillEntries[0]);
+
+      const mainMax = bestSkill.s.max;
+      const mainCurrent = bestSkill.s.current;
+      const upsRemaining = (mainMax !== null && mainCurrent !== null) ? mainMax - mainCurrent : null;
+
+      // RULE 1: Age >= 17 AND 2+ ups remaining → GOLFEUR
+      if (age >= 17 && upsRemaining !== null && upsRemaining >= 2) {
+        forced = 'GOLFEUR';
+        reason = `${age}a ${player.ageDays}j, ${bestSkill.name} ${mainCurrent}/${mainMax}=${upsRemaining} ups, trop tard→golfeur (forcé par code)`;
+      }
+
+      // RULE 2: Secondaries for natural position maxed ≤ 3
+      if (!forced) {
+        const posChecks = {
+          scorer: [skills.passing, skills.winger],      // Attaquant needs Passe + Ailier
+          playmaker: [skills.passing, skills.defender],  // Milieu needs Passe + Défense
+          winger: [skills.playmaker, skills.passing],    // Ailier needs Construction + Passe
+          defender: [skills.playmaker],                  // Défenseur needs Construction
+        };
+
+        const secondaries = posChecks[bestSkill.key] || [];
+        const badSecondaries = secondaries.filter(s => s.max !== null && s.max <= 3 && s.maxReached);
+
+        if (badSecondaries.length > 0) {
+          forced = 'GOLFEUR';
+          reason = `${age}a, secondaires maxées ≤3 pour ${bestSkill.name}→golfeur (forcé par code)`;
+        }
+      }
+
+      // RULE 3: No skill with max >= 7 → never STAR
+      if (!forced && (pred.category === 'STAR')) {
+        const hasMax7 = skillEntries.some(e => e.s.max !== null && e.s.max >= 7);
+        if (!hasMax7) {
+          forced = 'PROSPECT';
+          reason = `Aucune compétence max≥7, ne peut pas être STAR (forcé par code)`;
+        }
+      }
+
+      if (forced) {
+        return { ...pred, category: forced, justification: reason };
+      }
+      return pred;
+    });
+  }
+
   async function handleAnalyze() {
     setAnalyzing(true)
     setAnalyzeResult(null)
     try {
       const rawPreds = await askPredictions(hrfData, matchReports)
-      const toSave = rawPreds.map(p => ({
+
+      // Post-process: force classification rules the AI ignores
+      const correctedPreds = enforceClassification(rawPreds)
+      const forcedCount = rawPreds.filter((p, i) => p.category !== correctedPreds[i].category).length
+
+      const toSave = correctedPreds.map(p => ({
         id: p.id,
         skills: {
           keeper: p.keeper || {},
@@ -166,7 +243,7 @@ export default function App() {
       }))
 
       // Generate changelog by comparing old vs new
-      const changelog = generateAnalysisChangelog(predictions, rawPreds, hrfData.youthPlayers)
+      const changelog = generateAnalysisChangelog(predictions, correctedPreds, hrfData.youthPlayers)
       const now = new Date().toISOString()
 
       await savePredictions(toSave)
@@ -183,7 +260,8 @@ export default function App() {
       toSave.forEach(p => { const c = p.category || '?'; cats[c] = (cats[c] || 0) + 1 })
       const summary = Object.entries(cats).map(([k, v]) => `${v} ${k}`).join(', ')
       const changesCount = changelog.length
-      setAnalyzeResult(`✅ ${toSave.length} joueurs analysés : ${summary}${changesCount > 0 ? ` — ${changesCount} changement${changesCount > 1 ? 's' : ''} détecté${changesCount > 1 ? 's' : ''}` : ' — première analyse'}`)
+      const forcedMsg = forcedCount > 0 ? ` (${forcedCount} corrigé${forcedCount > 1 ? 's' : ''} par les règles de temps)` : ''
+      setAnalyzeResult(`✅ ${toSave.length} joueurs analysés : ${summary}${forcedMsg}${changesCount > 0 ? ` — ${changesCount} changement${changesCount > 1 ? 's' : ''}` : ' — première analyse'}`)
       setTimeout(() => setAnalyzeResult(null), 15000)
     } catch (e) {
       console.error('Analyze error:', e)

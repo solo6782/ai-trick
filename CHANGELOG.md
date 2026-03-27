@@ -2,6 +2,15 @@
 
 Toutes les modifications notables de **ai-trick** sont documentées ici.
 
+## [0.9.7] - 2026-03-27
+
+### Corrigé
+- **Classification forcée côté code** — L'IA classait encore des joueurs "trop tard" en STAR. Maintenant le code corrige APRÈS la réponse de l'IA :
+  - Règle 1 : âge ≥ 17 ET 2+ niveaux restants dans la compétence principale → GOLFEUR (forcé)
+  - Règle 2 : secondaires du poste maxées ≤ 3 → GOLFEUR (forcé)
+  - Règle 3 : aucune compétence max ≥ 7 → jamais STAR (rétrogradé en PROSPECT)
+- La bannière de résultat indique combien de classifications ont été corrigées par le code.
+
 ## [0.9.6] - 2026-03-27
 
 ### Corrigé

@@ -1,6 +1,15 @@
 import { useState, useEffect } from 'react'
 
-const CHANGELOG = `## [0.9.6] - 2026-03-27
+const CHANGELOG = `## [0.9.7] - 2026-03-27
+
+### Corrigé
+- Classification forcée côté CODE (l'IA ne peut plus contourner) :
+  - 17+ ans + 2 ups restants → GOLFEUR forcé
+  - Secondaires maxées ≤3 → GOLFEUR forcé
+  - Aucun max ≥7 → jamais STAR
+- Bannière indique les corrections appliquées
+
+## [0.9.6] - 2026-03-27
 
 ### Corrigé
 - Opus ignorait le filtre temps : algorithme en 3 étapes obligatoires imposé
