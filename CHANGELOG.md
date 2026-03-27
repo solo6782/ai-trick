@@ -2,6 +2,12 @@
 
 Toutes les modifications notables de **ai-trick** sont documentées ici.
 
+## [0.9.6] - 2026-03-27
+
+### Corrigé
+- **Opus ignorait le filtre temps** : le prompt d'analyse impose maintenant un ALGORITHME en 3 étapes obligatoires dans cet ordre : (1) Filtre temps — 17+ ans + 2 ups restants = GOLFEUR, STOP. (2) Filtre secondaires — maxées ≤3 = GOLFEUR, STOP. (3) Classification finale — seulement si pas filtré avant.
+- La justification doit TOUJOURS commencer par l'âge et le calcul de temps (ex: "17a 8j, CON 4/7=3 ups, trop tard→golfeur").
+
 ## [0.9.5] - 2026-03-27
 
 ### Amélioré

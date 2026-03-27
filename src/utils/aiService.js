@@ -134,26 +134,32 @@ async function callAI(userMessage, hrfData, matchReports = {}, model = MODEL_OPU
 export async function askPredictions(hrfData, matchReports) {
   const playerIds = hrfData.youthPlayers.map(p => `${p.id} (${p.name})`);
   const response = await callAI(
-    `Analyse CHAQUE joueur de l'effectif. Pour chacun :
-1. Estimer les compétences INCONNUES
-2. Classifier le joueur (POTENTIEL × TEMPS RESTANT)
-3. Identifier son poste naturel
-4. Lister les compétences manquantes
+    `Analyse CHAQUE joueur. Pour chacun, suis cet ALGORITHME dans cet ORDRE EXACT :
 
-CATÉGORIES (le TEMPS est aussi important que le POTENTIEL) :
-- STAR : max 7+ ET secondaires correctes ET TEMPS SUFFISANT pour maxer (≤16 ans, ou 17 ans avec max 1 niveau restant). L'entraînement tourne autour d'eux.
-- PROSPECT : bon potentiel mais temps serré (17 ans avec 2+ niveaux) ou secondaires incertaines. Mérite de jouer mais pas LA priorité.
-- MYSTERE : peu révélé, profil incertain, jeune (15-16 ans). À explorer en priorité.
-- GOLFEUR : secondaires maxées bas, OU potentiel faible, OU TROP TARD (17+ ans avec 2+ niveaux restants = ne sera jamais maxé). Mentionner "trop tard" dans la justification si applicable. Utile pour forcer les révélations.
-- INUTILE : aucun apport (ni golfeur utile, ni mystère)
+ÉTAPE 1 — FILTRE TEMPS (obligatoire, faire en PREMIER) :
+- Compétence principale = celle avec le max le plus élevé
+- Niveaux restants = max - actuel (si actuel inconnu, estimer)
+- SI âge ≥ 17 ans ET niveaux restants ≥ 2 → catégorie = GOLFEUR (justification : "trop tard, Xa Xj, [compétence] X/Y = Z ups restants"). STOP, passer au joueur suivant.
+- SI âge ≥ 17 ans ET secondaires du poste MAXÉES bas (≤3) → catégorie = GOLFEUR. STOP.
 
-RAPPEL : 1 up ≈ 1 saison (16 semaines). Un joueur de 17a avec Construction 4/7 (3 niveaux restants) = TROP TARD, c'est un GOLFEUR même si max 7.
+ÉTAPE 2 — FILTRE SECONDAIRES (si pas filtré à l'étape 1) :
+- Vérifier les compétences secondaires du poste naturel
+- Attaquant : Passe ET Ailier doivent être ≥ 4 max (non maxées bas)
+- Milieu : Passe ET Défense doivent être ≥ 4 max
+- Ailier : Construction ET Passe doivent être ≥ 4 max
+- SI secondaires MAXÉES ≤ 3 → catégorie = GOLFEUR. STOP.
+
+ÉTAPE 3 — CLASSIFICATION FINALE (si pas filtré avant) :
+- Peu de compétences révélées + ≤ 16 ans → MYSTERE
+- Max 7+ ET secondaires OK ET ≤ 16 ans (ou 17 ans + 1 seul up restant) → STAR
+- Bon potentiel mais temps serré ou incertain → PROSPECT
+- Sinon → GOLFEUR ou INUTILE
 
 CONTRAINTES DE FORMAT :
-- "justification" : 30 MOTS MAX. Inclure l'âge et le temps restant. Ex: "17a, Construction 4/7, 3 ups restants → trop tard, golfeur"
+- "justification" : 30 MOTS MAX. TOUJOURS commencer par "Xa Xj," puis le calcul de temps. Ex: "17a 8j, CON 4/7=3 ups, trop tard→golfeur" ou "15a 99j, PAS 5/8=3 ups, temps OK→STAR"
 - "naturalPosition" : 3 mots max
 - "missingSkills" : max 3 items courts
-- Compétences déjà connues = null
+- Compétences déjà connues dans le HRF = null
 - NE PAS ajouter de texte avant ou après le JSON
 
 Réponds UNIQUEMENT avec le JSON :

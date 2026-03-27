@@ -1,6 +1,15 @@
 import { useState, useEffect } from 'react'
 
-const CHANGELOG = `## [0.9.5] - 2026-03-27
+const CHANGELOG = `## [0.9.6] - 2026-03-27
+
+### Corrigé
+- Opus ignorait le filtre temps : algorithme en 3 étapes obligatoires imposé
+- Étape 1 : 17+ ans + 2 ups = GOLFEUR STOP
+- Étape 2 : secondaires maxées ≤3 = GOLFEUR STOP
+- Étape 3 : classification finale uniquement si pas filtré avant
+- Justification commence toujours par l'âge + calcul temps
+
+## [0.9.5] - 2026-03-27
 
 ### Amélioré
 - Classification POTENTIEL × TEMPS : 17+ ans + 2 niveaux restants = GOLFEUR (trop tard)
