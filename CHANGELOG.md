@@ -2,6 +2,14 @@
 
 Toutes les modifications notables de **ai-trick** sont documentées ici.
 
+## [0.9.4] - 2026-03-18
+
+### Corrigé
+- **Timeout Cloudflare (erreur 524)** : les promotions, licenciements et recrutement utilisent maintenant **Sonnet** (rapide, ~5s) au lieu d'Opus. Seules l'analyse et la composition restent sur **Opus** (raisonnement complexe).
+
+### Amélioré
+- L'API chat.js accepte un paramètre `model` dynamique — chaque fonction choisit le modèle adapté.
+
 ## [0.9.3] - 2026-03-18
 
 ### Amélioré

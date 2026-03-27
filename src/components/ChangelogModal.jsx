@@ -1,6 +1,12 @@
 import { useState, useEffect } from 'react'
 
-const CHANGELOG = `## [0.9.3] - 2026-03-18
+const CHANGELOG = `## [0.9.4] - 2026-03-18
+
+### Corrigé
+- Timeout Cloudflare (erreur 524) : promotions/licenciements/recrutement → Sonnet (rapide)
+- Analyse + Composition restent sur Opus (raisonnement complexe)
+
+## [0.9.3] - 2026-03-18
 
 ### Amélioré
 - Promotions/Licenciements repliés par défaut

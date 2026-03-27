@@ -96,7 +96,10 @@ function formatReports(reports) {
   }).join('\n');
 }
 
-async function callAI(userMessage, hrfData, matchReports = {}) {
+const MODEL_OPUS = 'claude-opus-4-6';
+const MODEL_SONNET = 'claude-sonnet-4-20250514';
+
+async function callAI(userMessage, hrfData, matchReports = {}, model = MODEL_OPUS) {
   const apiKey = await loadApiKey();
   if (!apiKey) throw new Error('Clé API Anthropic non configurée. Va dans les Paramètres.');
 
@@ -118,7 +121,7 @@ async function callAI(userMessage, hrfData, matchReports = {}) {
   const res = await fetch('/api/chat', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ apiKey, system: systemPrompt, message: context ? `${context}\n\n---\n\n${userMessage}` : userMessage })
+    body: JSON.stringify({ apiKey, system: systemPrompt, model, message: context ? `${context}\n\n---\n\n${userMessage}` : userMessage })
   });
 
   if (!res.ok) { const e = await res.text(); throw new Error(`Erreur API: ${res.status} — ${e}`); }
@@ -190,7 +193,7 @@ function buildCompactPlayerList(hrfData, predictions) {
   return lines.join('\n');
 }
 
-async function callAICompo(message) {
+async function callAICompo(message, model = MODEL_OPUS) {
   const apiKey = await loadApiKey();
   if (!apiKey) throw new Error('Clé API Anthropic non configurée.');
 
@@ -200,7 +203,7 @@ async function callAICompo(message) {
   const res = await fetch('/api/chat', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ apiKey, system: systemPrompt, message })
+    body: JSON.stringify({ apiKey, system: systemPrompt, model, message })
   });
 
   if (!res.ok) { const e = await res.text(); throw new Error(`Erreur API: ${res.status} — ${e}`); }
@@ -250,7 +253,7 @@ export async function askRecruitment(hrfData, profiles) {
 
 PROFIL 1:\n${profiles[0] || '(vide)'}\n\nPROFIL 2:\n${profiles[1] || '(vide)'}\n\nPROFIL 3:\n${profiles[2] || '(vide)'}
 
-Compare entre eux. Meilleur potentiel brut, indépendamment des besoins.`, hrfData);
+Compare entre eux. Meilleur potentiel brut, indépendamment des besoins.`, hrfData, {}, MODEL_SONNET);
 }
 
 export async function askPromotions(hrfData, matchReports) {
@@ -258,11 +261,11 @@ export async function askPromotions(hrfData, matchReports) {
 - "PROMOUVOIR MAINTENANT" (vendre / intégrer / va expirer)
 - "ATTENDRE" (progression en cours, ups restants)
 - "NE PAS PROMOUVOIR" (sans valeur)
-Entraînement senior : ${hrfData?.training?.type || 'inconnu'}.`, hrfData, matchReports);
+Entraînement senior : ${hrfData?.training?.type || 'inconnu'}.`, hrfData, matchReports, MODEL_SONNET);
 }
 
 export async function askDismissals(hrfData, matchReports) {
   return callAI(`Effectif : ${hrfData?.youthPlayers?.length || '?'} joueurs (seuil : 14 max).
 Identifie les candidats au licenciement, du moins utile au plus utile. Justifie.
-JAMAIS licencier un joueur au potentiel largement inconnu.`, hrfData, matchReports);
+JAMAIS licencier un joueur au potentiel largement inconnu.`, hrfData, matchReports, MODEL_SONNET);
 }
