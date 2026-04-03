@@ -400,7 +400,7 @@ export default function App() {
 
       {page === 'settings' && <Settings onApiKeyChange={setHasApiKey} />}
 
-      {page === 'reports' && <ReportsPage matchReports={matchReports} onDelete={handleReportDelete} onEdit={handleReportEdit} />}
+      {page === 'reports' && <ReportsPage matchReports={matchReports} playerHistory={playerHistory} onDelete={handleReportDelete} onEdit={handleReportEdit} onImportReport={() => setShowImportReport(true)} />}
 
       {showImportHRF && <ImportHRFModal onImport={handleHRFImport} onHistoryImported={async () => { const h = await loadPlayerHistory(); setPlayerHistory(h); }} onClose={() => setShowImportHRF(false)} />}
       {showImportReport && hrfData && <ImportReportModal players={hrfData.youthPlayers} existingReports={matchReports} onSave={handleReportSave} onClose={() => setShowImportReport(false)} />}

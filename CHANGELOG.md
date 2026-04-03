@@ -2,6 +2,11 @@
 
 Toutes les modifications notables de **ai-trick** sont documentées ici.
 
+## [0.9.9] - 2026-03-28
+
+### Ajouté
+- **Rapports manquants** : l'onglet Rapports affiche en haut la liste des matchs qui n'ont pas de rapport importé. Croise l'historique des matchs (HRF) avec les rapports existants pour identifier les trous. Bouton "Importer" pour chaque match manquant.
+
 ## [0.9.8] - 2026-03-27
 
 ### Corrigé

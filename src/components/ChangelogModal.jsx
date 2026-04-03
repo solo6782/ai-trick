@@ -1,6 +1,13 @@
 import { useState, useEffect } from 'react'
 
-const CHANGELOG = `## [0.9.8] - 2026-03-27
+const CHANGELOG = `## [0.9.9] - 2026-03-28
+
+### Ajouté
+- Rapports manquants : liste des matchs sans rapport dans l'onglet Rapports
+- Croise historique HRF × rapports existants
+- Bouton "Importer" par match manquant
+
+## [0.9.8] - 2026-03-27
 
 ### Corrigé
 - Bug filtre temps : current null dans HRF → utilise prédiction IA comme fallback

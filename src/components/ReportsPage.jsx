@@ -1,10 +1,36 @@
-import { useState } from 'react'
+import { useState, useMemo } from 'react'
 import { formatDateFR, parseDate } from '../utils/hrfParser'
 
-export default function ReportsPage({ matchReports, onDelete, onEdit }) {
+export default function ReportsPage({ matchReports, playerHistory, onDelete, onEdit, onImportReport }) {
   const [expandedId, setExpandedId] = useState(null)
   const [editing, setEditing] = useState(null)
   const [editData, setEditData] = useState({})
+
+  // Find matches without reports
+  const missingReports = useMemo(() => {
+    if (!playerHistory || playerHistory.length === 0) return [];
+    // Extract unique matches from history
+    const matchMap = new Map();
+    for (const h of playerHistory) {
+      if (h.match_id && !matchMap.has(h.match_id)) {
+        matchMap.set(h.match_id, h.match_date);
+      }
+    }
+    // Filter out matches that already have a report
+    const missing = [];
+    for (const [matchId, matchDate] of matchMap.entries()) {
+      if (!matchReports[matchId]) {
+        missing.push({ id: matchId, date: matchDate });
+      }
+    }
+    // Sort most recent first
+    missing.sort((a, b) => {
+      const da = parseDate(a.date) || new Date(0);
+      const db = parseDate(b.date) || new Date(0);
+      return db.getTime() - da.getTime();
+    });
+    return missing;
+  }, [playerHistory, matchReports]);
 
   const entries = Object.entries(matchReports).sort((a, b) => {
     const da = parseDate(a[1].date) || new Date(0)
@@ -41,16 +67,67 @@ export default function ReportsPage({ matchReports, onDelete, onEdit }) {
 
   if (entries.length === 0) {
     return (
-      <div className="empty-state">
-        <div className="icon">📋</div>
-        <h2>Aucun rapport importé</h2>
-        <p>Utilise le bouton "Rapport" dans la barre du haut pour importer tes premiers rapports de match.</p>
+      <div>
+        {/* Missing reports alert even when no reports exist */}
+        {missingReports.length > 0 && (
+          <div className="alert-card alert-warning" style={{ marginBottom: 20 }}>
+            <h3>⚠️ {missingReports.length} rapport{missingReports.length > 1 ? 's' : ''} manquant{missingReports.length > 1 ? 's' : ''}</h3>
+            <div style={{ marginTop: 8 }}>
+              {missingReports.map(m => (
+                <div key={m.id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '6px 0', borderBottom: '1px solid var(--border)' }}>
+                  <div>
+                    <span style={{ color: 'var(--accent-orange)', fontWeight: 600, fontSize: '0.85rem' }}>
+                      {m.date ? formatDateFR(m.date) : 'Date inconnue'}
+                    </span>
+                    <span style={{ color: 'var(--text-muted)', marginLeft: 12, fontSize: '0.75rem', fontFamily: 'var(--font-mono)' }}>
+                      ID {m.id}
+                    </span>
+                  </div>
+                  <button className="btn btn-sm btn-orange" onClick={onImportReport}>
+                    📋 Importer
+                  </button>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+        <div className="empty-state">
+          <div className="icon">📋</div>
+          <h2>Aucun rapport importé</h2>
+          <p>Utilise le bouton "Rapport" dans la barre du haut pour importer tes premiers rapports de match.</p>
+        </div>
       </div>
     )
   }
 
   return (
     <div>
+      {/* Missing reports alert */}
+      {missingReports.length > 0 && (
+        <div className="alert-card alert-warning" style={{ marginBottom: 20 }}>
+          <h3 style={{ cursor: 'default' }}>
+            ⚠️ {missingReports.length} rapport{missingReports.length > 1 ? 's' : ''} manquant{missingReports.length > 1 ? 's' : ''}
+          </h3>
+          <div style={{ marginTop: 8 }}>
+            {missingReports.map(m => (
+              <div key={m.id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '6px 0', borderBottom: '1px solid var(--border)' }}>
+                <div>
+                  <span style={{ color: 'var(--accent-orange)', fontWeight: 600, fontSize: '0.85rem' }}>
+                    {m.date ? formatDateFR(m.date) : 'Date inconnue'}
+                  </span>
+                  <span style={{ color: 'var(--text-muted)', marginLeft: 12, fontSize: '0.75rem', fontFamily: 'var(--font-mono)' }}>
+                    ID {m.id}
+                  </span>
+                </div>
+                <button className="btn btn-sm btn-orange" onClick={onImportReport}>
+                  📋 Importer
+                </button>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
       <h2 style={{ fontSize: '1.1rem', fontWeight: 700, marginBottom: 20 }}>📋 Rapports de match ({entries.length})</h2>
 
       {entries.map(([id, report]) => {
