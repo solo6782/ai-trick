@@ -29,7 +29,13 @@ export default function ReportsPage({ matchReports, playerHistory, onDelete, onE
       const db = parseDate(b.date) || new Date(0);
       return db.getTime() - da.getTime();
     });
-    return missing;
+    // Only show last 30 days
+    const thirtyDaysAgo = new Date();
+    thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+    return missing.filter(m => {
+      const d = parseDate(m.date);
+      return d && d.getTime() >= thirtyDaysAgo.getTime();
+    });
   }, [playerHistory, matchReports]);
 
   const entries = Object.entries(matchReports).sort((a, b) => {
