@@ -5,30 +5,51 @@ import { formatDateFR } from '../utils/hrfParser'
 import PitchView from './PitchView'
 
 function parseCompoResponse(raw) {
+  if (!raw) return { type: 'text', raw: raw || '' }
+
   try {
     // 1. Try ```json block
     const jsonBlock = raw.match(/```json\s*([\s\S]*?)```/)
-    if (jsonBlock) return { type: 'json', data: JSON.parse(jsonBlock[1].trim()), raw }
+    if (jsonBlock) {
+      try { return { type: 'json', data: JSON.parse(jsonBlock[1].trim()), raw } } catch {}
+    }
 
     // 2. Try ``` block
     const codeBlock = raw.match(/```\s*([\s\S]*?)```/)
     if (codeBlock) {
       const inner = codeBlock[1].trim()
-      if (inner.startsWith('{')) return { type: 'json', data: JSON.parse(inner), raw }
+      try { return { type: 'json', data: JSON.parse(inner), raw } } catch {}
     }
 
-    // 3. Find first { and try to parse
+    // 3. Look for known JSON start patterns
+    const patterns = ['{"primaryTraining"', '{"classification"', '{ "primaryTraining"', '{ "classification"']
+    for (const pat of patterns) {
+      const idx = raw.indexOf(pat)
+      if (idx >= 0) {
+        const substr = raw.substring(idx)
+        // Try full string
+        try { return { type: 'json', data: JSON.parse(substr), raw } } catch {}
+        // Try up to last }
+        const lastClose = substr.lastIndexOf('}')
+        if (lastClose > 0) {
+          try { return { type: 'json', data: JSON.parse(substr.substring(0, lastClose + 1)), raw } } catch {}
+        }
+      }
+    }
+
+    // 4. Generic: find first { and try
     const start = raw.indexOf('{')
     if (start >= 0) {
       const substr = raw.substring(start)
       try { return { type: 'json', data: JSON.parse(substr), raw } } catch {}
-      // Try finding last }
       const lastClose = substr.lastIndexOf('}')
       if (lastClose > 0) {
         try { return { type: 'json', data: JSON.parse(substr.substring(0, lastClose + 1)), raw } } catch {}
       }
     }
   } catch (e) { console.warn('Could not parse composition JSON:', e) }
+
+  console.warn('parseCompoResponse fell through to text mode. Response preview:', raw.substring(0, 200))
   return { type: 'text', raw }
 }
 
