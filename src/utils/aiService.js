@@ -97,7 +97,7 @@ function formatReports(reports) {
 }
 
 const MODEL_OPUS = 'claude-opus-4-6';
-const MODEL_SONNET = 'claude-sonnet-4-20250514';
+const MODEL_SONNET = 'claude-sonnet-4-6';
 
 async function callAI(userMessage, hrfData, matchReports = {}, model = MODEL_OPUS) {
   const apiKey = await loadApiKey();
