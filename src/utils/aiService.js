@@ -87,13 +87,11 @@ Compétences:\n${skills}\n${lm}\n${histStr}Scout:\n${scouts || '  Aucun'}\n`;
 
 function formatReports(reports) {
   if (!reports || Object.keys(reports).length === 0) return '';
-  return '\n## RAPPORTS DE MATCH\n' + Object.entries(reports).map(([id, r]) => {
-    let t = `\n### Match ${id} (${r.date || '?'})\n`;
-    if (r.rapport) t += `**Rapport:**\n${r.rapport}\n`;
-    if (r.compteRendu) t += `**Compte-rendu:**\n${r.compteRendu}\n`;
-    if (r.notesDetaillees) t += `**Notes détaillées:**\n${r.notesDetaillees}\n`;
-    return t;
-  }).join('\n');
+  const blocks = Object.entries(reports)
+    .filter(([, r]) => r.notesDetaillees)
+    .map(([id, r]) => `\n### Match ${id} (${r.date || '?'})\n**Notes détaillées:**\n${r.notesDetaillees}\n`);
+  if (blocks.length === 0) return '';
+  return '\n## RAPPORTS DE MATCH\n' + blocks.join('\n');
 }
 
 const MODEL_OPUS = 'claude-opus-4-6';

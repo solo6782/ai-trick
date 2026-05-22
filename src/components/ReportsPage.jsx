@@ -47,8 +47,6 @@ export default function ReportsPage({ matchReports, playerHistory, onDelete, onE
   function handleEdit(id, report) {
     setEditing(id)
     setEditData({
-      rapport: report.rapport || '',
-      compteRendu: report.compteRendu || '',
       notesDetaillees: report.notesDetaillees || ''
     })
   }
@@ -57,8 +55,6 @@ export default function ReportsPage({ matchReports, playerHistory, onDelete, onE
     const report = matchReports[id]
     onEdit(id, {
       date: report.date,
-      rapport: editData.rapport,
-      compteRendu: editData.compteRendu,
       notesDetaillees: editData.notesDetaillees
     })
     setEditing(null)
@@ -139,10 +135,7 @@ export default function ReportsPage({ matchReports, playerHistory, onDelete, onE
       {entries.map(([id, report]) => {
         const isExpanded = expandedId === id
         const isEditing = editing === id
-        const hasRapport = !!report.rapport
-        const hasCR = !!report.compteRendu
         const hasNotes = !!report.notesDetaillees
-        const fieldCount = [hasRapport, hasCR, hasNotes].filter(Boolean).length
 
         return (
           <div key={id} className="alert-card" style={{
@@ -166,7 +159,7 @@ export default function ReportsPage({ matchReports, playerHistory, onDelete, onE
               </h3>
               <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
                 <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>
-                  {fieldCount}/3 champs
+                  {hasNotes ? 'Notes ✓' : 'Vide'}
                 </span>
                 <span style={{ color: 'var(--text-muted)', fontSize: '0.9rem' }}>
                   {isExpanded ? '▼' : '▶'}
@@ -177,28 +170,6 @@ export default function ReportsPage({ matchReports, playerHistory, onDelete, onE
             {/* Expanded content */}
             {isExpanded && !isEditing && (
               <div style={{ marginTop: 16 }}>
-                {hasRapport && (
-                  <div style={{ marginBottom: 16 }}>
-                    <div style={{ fontSize: '0.78rem', fontWeight: 600, color: 'var(--accent-green)', marginBottom: 6, textTransform: 'uppercase', letterSpacing: '0.06em' }}>
-                      Rapport de l'entraîneur
-                    </div>
-                    <div className="scout-comment" style={{ borderLeftColor: 'var(--accent-green)', whiteSpace: 'pre-wrap' }}>
-                      {report.rapport}
-                    </div>
-                  </div>
-                )}
-
-                {hasCR && (
-                  <div style={{ marginBottom: 16 }}>
-                    <div style={{ fontSize: '0.78rem', fontWeight: 600, color: 'var(--accent-orange)', marginBottom: 6, textTransform: 'uppercase', letterSpacing: '0.06em' }}>
-                      Compte-rendu du match
-                    </div>
-                    <div className="scout-comment" style={{ borderLeftColor: 'var(--accent-orange)', whiteSpace: 'pre-wrap' }}>
-                      {report.compteRendu}
-                    </div>
-                  </div>
-                )}
-
                 {hasNotes && (
                   <div style={{ marginBottom: 16 }}>
                     <div style={{ fontSize: '0.78rem', fontWeight: 600, color: 'var(--accent-purple)', marginBottom: 6, textTransform: 'uppercase', letterSpacing: '0.06em' }}>
@@ -229,14 +200,6 @@ export default function ReportsPage({ matchReports, playerHistory, onDelete, onE
             {/* Edit mode */}
             {isExpanded && isEditing && (
               <div style={{ marginTop: 16 }} onClick={e => e.stopPropagation()}>
-                <div className="form-group">
-                  <label>Rapport de l'entraîneur</label>
-                  <textarea value={editData.rapport} onChange={e => setEditData({ ...editData, rapport: e.target.value })} rows={6} />
-                </div>
-                <div className="form-group">
-                  <label>Compte-rendu du match</label>
-                  <textarea value={editData.compteRendu} onChange={e => setEditData({ ...editData, compteRendu: e.target.value })} rows={6} />
-                </div>
                 <div className="form-group">
                   <label>Notes détaillées</label>
                   <textarea value={editData.notesDetaillees} onChange={e => setEditData({ ...editData, notesDetaillees: e.target.value })} rows={6} />

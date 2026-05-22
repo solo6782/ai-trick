@@ -32,8 +32,6 @@ export async function saveMatchReport(matchId, report) {
     body: JSON.stringify({
       matchId,
       date: report.date,
-      rapport: report.rapport,
-      compteRendu: report.compteRendu,
       notesDetaillees: report.notesDetaillees
     })
   });

@@ -14,8 +14,6 @@ export default function ImportReportModal({ players, existingReports, onSave, on
   const [matchId, setMatchId] = useState(matches[0]?.id || '')
   const [manualId, setManualId] = useState('')
   const [manualDate, setManualDate] = useState('')
-  const [rapport, setRapport] = useState('')
-  const [compteRendu, setCompteRendu] = useState('')
   const [notesDetaillees, setNotesDetaillees] = useState('')
 
   function handleSave() {
@@ -28,10 +26,10 @@ export default function ImportReportModal({ players, existingReports, onSave, on
       date = manualDate.trim()
     }
     if (!id) return
-    onSave(id, { date, rapport: rapport.trim(), compteRendu: compteRendu.trim(), notesDetaillees: notesDetaillees.trim() })
+    onSave(id, { date, notesDetaillees: notesDetaillees.trim() })
   }
 
-  const hasContent = rapport.trim() || compteRendu.trim() || notesDetaillees.trim()
+  const hasContent = notesDetaillees.trim()
   const hasId = mode === 'select' ? !!matchId : !!manualId.trim()
 
   return (
@@ -77,16 +75,6 @@ export default function ImportReportModal({ players, existingReports, onSave, on
             </div>
           </>
         )}
-
-        <div className="form-group">
-          <label>Rapport de l'entraîneur</label>
-          <textarea value={rapport} onChange={e => setRapport(e.target.value)} placeholder="Colle ici le rapport de l'entraîneur junior (commentaires post-match)..." rows={6} />
-        </div>
-
-        <div className="form-group">
-          <label>Compte-rendu du match</label>
-          <textarea value={compteRendu} onChange={e => setCompteRendu(e.target.value)} placeholder="Colle ici le compte-rendu détaillé du match (récit, événements)..." rows={6} />
-        </div>
 
         <div className="form-group">
           <label>Notes détaillées (ratings par secteur)</label>

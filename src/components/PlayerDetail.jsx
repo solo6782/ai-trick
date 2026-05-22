@@ -131,19 +131,6 @@ export default function PlayerDetail({ player, matchReports, predictions, score,
         )}
 
         {history.length > 0 && (() => {
-          // Build a map of match_id → coach sentences for this player
-          const nameVariants = [player.name, player.firstName, player.lastName].filter(n => n && n.length > 2);
-          const coachByMatch = {};
-
-          for (const [id, r] of Object.entries(matchReports)) {
-            if (!r.rapport) continue;
-            const sentences = r.rapport.split(/(?<=\.)\s*(?=[A-ZÀ-ÿ])/).map(s => s.trim()).filter(Boolean);
-            const matching = sentences.filter(s =>
-              nameVariants.some(n => s.toLowerCase().includes(n.toLowerCase()))
-            );
-            if (matching.length > 0) coachByMatch[id] = matching;
-          }
-
           // Sort history: most recent first
           const sorted = [...history].sort((a, b) => {
             const da = parseDate(a.match_date) || new Date(0);
@@ -155,12 +142,11 @@ export default function PlayerDetail({ player, matchReports, predictions, score,
             <div className="detail-section">
               <h3>Historique des matchs ({sorted.length})</h3>
               {sorted.map((h, i) => {
-                const phrases = coachByMatch[h.match_id] || [];
                 return (
-                  <div key={i} style={{ marginBottom: phrases.length > 0 ? 12 : 0 }}>
+                  <div key={i}>
                     <div style={{
                       display: 'flex', gap: 16, padding: '6px 0',
-                      borderBottom: phrases.length > 0 ? 'none' : '1px solid var(--border)',
+                      borderBottom: '1px solid var(--border)',
                       fontSize: '0.78rem'
                     }}>
                       <span style={{ minWidth: 110, color: 'var(--text-secondary)' }}>
@@ -170,17 +156,6 @@ export default function PlayerDetail({ player, matchReports, predictions, score,
                       <span style={{ minWidth: 40, textAlign: 'center', fontFamily: 'var(--font-mono)' }}>{h.played_minutes}</span>
                       <span style={{ minWidth: 30, textAlign: 'center', color: 'var(--accent-orange)', fontFamily: 'var(--font-mono)' }}>{h.rating}★</span>
                     </div>
-                    {phrases.length > 0 && (
-                      <div style={{ paddingBottom: 8, borderBottom: '1px solid var(--border)' }}>
-                        {phrases.map((s, j) => (
-                          <div key={j} className="scout-comment" style={{
-                            borderLeftColor: 'var(--accent-green)',
-                            marginTop: 4,
-                            fontSize: '0.78rem'
-                          }}>{s}</div>
-                        ))}
-                      </div>
-                    )}
                   </div>
                 );
               })}

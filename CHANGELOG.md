@@ -2,6 +2,16 @@
 
 Toutes les modifications notables de **ai-trick** sont documentées ici.
 
+## [0.9.13] - 2026-05-22
+
+### Modifié / Supprimé
+- **Allègement des rapports de match (optimisation coût API)** : suppression des champs `rapport` (phrases de l'entraîneur) et `compte-rendu` (récit du match).
+  - Les phrases de l'entraîneur faisaient double emploi avec les `ScoutComments` du HRF, déjà structurés (compétence + niveau) et déjà envoyés à l'IA.
+  - Le compte-rendu (récit) n'apporte aucun signal de classification (potentiel / temps restant) et était le champ le plus lourd en tokens.
+  - Seules les **notes détaillées** (ratings par secteur) sont conservées.
+- Saisie, stockage (DB), affichage et contexte IA mis à jour en conséquence.
+- Migration `0004_drop_report_fields.sql` : suppression des colonnes `rapport` et `compte_rendu` (destructif — à appliquer via `wrangler d1 migrations apply`).
+
 ## [0.9.9] - 2026-03-28
 
 ### Ajouté
