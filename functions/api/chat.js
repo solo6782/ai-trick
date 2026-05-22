@@ -11,7 +11,7 @@ export async function onRequestOptions() {
 
 export async function onRequestPost(context) {
   try {
-    const { apiKey, system, message, model } = await context.request.json();
+    const { apiKey, system, message, model, systemBlocks, messageBlocks } = await context.request.json();
 
     if (!apiKey) {
       return new Response(JSON.stringify({ error: 'API key missing' }), {
@@ -20,6 +20,16 @@ export async function onRequestPost(context) {
     }
 
     const selectedModel = model || 'claude-opus-4-6';
+
+    // Build system: prefer structured cacheable blocks if provided, else plain string
+    const systemPayload = Array.isArray(systemBlocks) && systemBlocks.length
+      ? systemBlocks
+      : system;
+
+    // Build user content: prefer structured cacheable blocks if provided, else plain string
+    const userContent = Array.isArray(messageBlocks) && messageBlocks.length
+      ? messageBlocks
+      : message;
 
     const response = await fetch('https://api.anthropic.com/v1/messages', {
       method: 'POST',
@@ -31,8 +41,8 @@ export async function onRequestPost(context) {
       body: JSON.stringify({
         model: selectedModel,
         max_tokens: 16384,
-        system,
-        messages: [{ role: 'user', content: message }]
+        system: systemPayload,
+        messages: [{ role: 'user', content: userContent }]
       })
     });
 

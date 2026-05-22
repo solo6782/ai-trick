@@ -2,6 +2,18 @@
 
 Toutes les modifications notables de **ai-trick** sont documentées ici.
 
+## [0.9.14] - 2026-05-22
+
+### Optimisation coût API
+- **Prompt caching** : le system prompt (règles d'analyse) et le bloc effectif HRF sont désormais marqués comme cachables (`cache_control: ephemeral`). Les appels rapprochés (< 5 min) relisent ces blocs à ~10% du tarif au lieu de les repayer plein tarif. Aucun changement de comportement de l'IA.
+- **Logging usage** : chaque appel logge dans la console navigateur (F12) le détail des tokens (entrée / mis en cache / relu du cache / sortie) → preuve chiffrée de l'effet du cache.
+- **Predictions sur Sonnet 4.6** (au lieu d'Opus 4.6) : les règles de classification critiques étant déjà appliquées côté code, Opus n'est plus nécessaire ici. La composition reste sur Opus 4.6.
+- **Recrutement allégé** : l'effectif junior n'est plus envoyé lors de la comparaison de profils externes (le recrutement vise le potentiel brut, indépendamment de l'effectif). Moins de tokens d'entrée.
+
+### Retour arrière éventuel
+- Predictions : repasser `MODEL_SONNET` → `MODEL_OPUS` dans `askPredictions`.
+- Recrutement : repasser `includeTeam: false` → `true` dans `askRecruitment`.
+
 ## [0.9.13] - 2026-05-22
 
 ### Modifié / Supprimé

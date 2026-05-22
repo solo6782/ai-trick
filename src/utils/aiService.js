@@ -97,33 +97,57 @@ function formatReports(reports) {
 const MODEL_OPUS = 'claude-opus-4-6';
 const MODEL_SONNET = 'claude-sonnet-4-6';
 
-async function callAI(userMessage, hrfData, matchReports = {}, model = MODEL_OPUS) {
+// Logs Anthropic token usage so the cache effect is verifiable in the browser console (F12).
+function logUsage(label, data) {
+  const u = data?.usage;
+  if (!u) return;
+  const created = u.cache_creation_input_tokens || 0;
+  const read = u.cache_read_input_tokens || 0;
+  const fresh = u.input_tokens || 0;
+  console.log(
+    `[ai-trick cache] ${label} — entrée: ${fresh} | mis en cache: ${created} | relu du cache (~10%): ${read} | sortie: ${u.output_tokens || 0}`
+  );
+}
+
+async function callAI(userMessage, hrfData, matchReports = {}, model = MODEL_OPUS, opts = {}) {
+  const { includeTeam = true, label = 'callAI' } = opts;
   const apiKey = await loadApiKey();
   if (!apiKey) throw new Error('Clé API Anthropic non configurée. Va dans les Paramètres.');
 
   const customNotes = await loadCustomNotes();
   const systemPrompt = buildFullPrompt(customNotes);
 
-  let context = '';
-  if (hrfData) {
+  // System prompt is identical across every call → mark it cacheable.
+  const systemBlocks = [
+    { type: 'text', text: systemPrompt, cache_control: { type: 'ephemeral' } }
+  ];
+
+  // The team roster block is identical across predictions/promotions/dismissals
+  // within a cycle → mark it cacheable as its own user content block.
+  const messageBlocks = [];
+  if (hrfData && includeTeam) {
     const history = await loadPlayerHistory();
-    context += `## DONNÉES DE L'ÉQUIPE\n`;
+    let context = `## DONNÉES DE L'ÉQUIPE\n`;
     context += `Équipe: ${hrfData.team.youthTeamName} (${hrfData.team.teamName})\n`;
     context += `Saison: ${hrfData.team.season}, Journée: ${hrfData.team.matchRound}\n`;
     context += `Entraînement senior: ${hrfData.training.type} (intensité: ${hrfData.training.level}%, endurance: ${hrfData.training.staminaPart}%)\n\n`;
     context += `## EFFECTIF JUNIOR (${hrfData.youthPlayers.length} joueurs)\n\n`;
     context += hrfData.youthPlayers.map(p => formatPlayerForAI(p, history)).join('\n---\n');
     context += formatReports(matchReports);
+    messageBlocks.push({ type: 'text', text: context, cache_control: { type: 'ephemeral' } });
   }
+  // The question varies per call → not cached.
+  messageBlocks.push({ type: 'text', text: userMessage });
 
   const res = await fetch('/api/chat', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ apiKey, system: systemPrompt, model, message: context ? `${context}\n\n---\n\n${userMessage}` : userMessage })
+    body: JSON.stringify({ apiKey, model, systemBlocks, messageBlocks })
   });
 
   if (!res.ok) { const e = await res.text(); throw new Error(`Erreur API: ${res.status} — ${e}`); }
   const data = await res.json();
+  logUsage(label, data);
   return data.content?.[0]?.text || 'Pas de réponse.';
 }
 
@@ -165,7 +189,7 @@ Réponds UNIQUEMENT avec le JSON :
 
 Chaque compétence = null (si connue) ou {"current":N,"max":N,"confidence":"low/medium/high"} (si inconnue et estimable).
 
-Joueurs : ${playerIds.join(', ')}`, hrfData, matchReports);
+Joueurs : ${playerIds.join(', ')}`, hrfData, matchReports, MODEL_SONNET, { label: 'predictions' });
 
   // Robust JSON extraction
   const parsed = extractJSON(response);
@@ -198,21 +222,26 @@ function buildCompactPlayerList(hrfData, predictions) {
   return lines.join('\n');
 }
 
-async function callAICompo(message, model = MODEL_OPUS) {
+async function callAICompo(message, model = MODEL_OPUS, label = 'compo') {
   const apiKey = await loadApiKey();
   if (!apiKey) throw new Error('Clé API Anthropic non configurée.');
 
   const customNotes = await loadCustomNotes();
   const systemPrompt = buildFullPrompt(customNotes);
 
+  const systemBlocks = [
+    { type: 'text', text: systemPrompt, cache_control: { type: 'ephemeral' } }
+  ];
+
   const res = await fetch('/api/chat', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ apiKey, system: systemPrompt, model, message })
+    body: JSON.stringify({ apiKey, model, systemBlocks, messageBlocks: [{ type: 'text', text: message }] })
   });
 
   if (!res.ok) { const e = await res.text(); throw new Error(`Erreur API: ${res.status} — ${e}`); }
   const data = await res.json();
+  logUsage(label, data);
   return data.content?.[0]?.text || 'Pas de réponse.';
 }
 
@@ -258,7 +287,7 @@ export async function askRecruitment(hrfData, profiles) {
 
 PROFIL 1:\n${profiles[0] || '(vide)'}\n\nPROFIL 2:\n${profiles[1] || '(vide)'}\n\nPROFIL 3:\n${profiles[2] || '(vide)'}
 
-Compare entre eux. Meilleur potentiel brut, indépendamment des besoins.`, hrfData, {}, MODEL_SONNET);
+Compare entre eux. Meilleur potentiel brut, indépendamment des besoins.`, hrfData, {}, MODEL_SONNET, { includeTeam: false, label: 'recruitment' });
 }
 
 export async function askPromotions(hrfData, matchReports) {
@@ -266,11 +295,11 @@ export async function askPromotions(hrfData, matchReports) {
 - "PROMOUVOIR MAINTENANT" (vendre / intégrer / va expirer)
 - "ATTENDRE" (progression en cours, ups restants)
 - "NE PAS PROMOUVOIR" (sans valeur)
-Entraînement senior : ${hrfData?.training?.type || 'inconnu'}.`, hrfData, matchReports, MODEL_SONNET);
+Entraînement senior : ${hrfData?.training?.type || 'inconnu'}.`, hrfData, matchReports, MODEL_SONNET, { label: 'promotions' });
 }
 
 export async function askDismissals(hrfData, matchReports) {
   return callAI(`Effectif : ${hrfData?.youthPlayers?.length || '?'} joueurs (seuil : 14 max).
 Identifie les candidats au licenciement, du moins utile au plus utile. Justifie.
-JAMAIS licencier un joueur au potentiel largement inconnu.`, hrfData, matchReports, MODEL_SONNET);
+JAMAIS licencier un joueur au potentiel largement inconnu.`, hrfData, matchReports, MODEL_SONNET, { label: 'dismissals' });
 }
