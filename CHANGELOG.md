@@ -2,6 +2,16 @@
 
 Toutes les modifications notables de **ai-trick** sont documentées ici.
 
+## [0.9.15] - 2026-05-24
+
+### Ajouté
+- **Estimation des caractéristiques cachées** (`skillEstimator.js`) : pour un jeune dont la carac dominante du poste joué est inconnue, l'app estime sa valeur à partir de sa note individuelle de match, et l'affiche en fourchette (ex. `~4.5 (3–6)`).
+  - Modèle calé et validé sur données réelles youth (8 HRF, ~46 cas, validation leave-one-out).
+  - Précision mesurée : défenseur central ±0.34, ailier ±0.45, attaquant ±0.48, arrière ±0.56, milieu ±0.72.
+  - Aucun coût API (calcul local), aucune dépendance aux rapports de match (CR testés : sans gain).
+  - Exploite le fait que les jeunes n'ont pas de forme/endurance comme facteur (règles HT), ce qui rend la note directement exploitable.
+- **Pastille de confiance** (verte/orange/rouge) + légende sur la fiche joueur. Le `?` est conservé quand aucune estimation n'est possible (pas de match, <60 min, ou gardien).
+
 ## [0.9.14] - 2026-05-22
 
 ### Optimisation coût API

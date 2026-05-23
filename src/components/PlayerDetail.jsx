@@ -1,5 +1,9 @@
 import { getSkillLabel, getPositionLabel, formatAge, formatDateFR, parseDate } from '../utils/hrfParser'
 import { getScoreColor } from '../utils/scoreCalculator'
+import { estimateSkillFromRating } from '../utils/skillEstimator'
+
+// Couleur de la pastille selon la confiance de l'estimation calculée
+const CONFIDENCE_DOT = { bonne: '#10b981', moyenne: '#f59e0b', faible: '#ef4444' }
 
 const SKILL_KEYS = [
   { key: 'keeper', name: 'Gardien', color: '#22d3ee' },
@@ -11,7 +15,7 @@ const SKILL_KEYS = [
   { key: 'setPieces', name: 'Coup franc', color: '#94a3b8' }
 ]
 
-function SkillBar({ name, skill, prediction, color }) {
+function SkillBar({ name, skill, prediction, color, estimate }) {
   const MAX = 10
   const pred = prediction || {}
 
@@ -24,7 +28,14 @@ function SkillBar({ name, skill, prediction, color }) {
   const curPct = showCur !== null ? (showCur / MAX) * 100 : 0
   const maxPct = showMax !== null ? (showMax / MAX) * 100 : 0
 
-  const curLabel = showCur !== null ? `${curIsPred ? '~' : ''}${showCur} (${getSkillLabel(showCur)})` : '?'
+  // Estimation calculée (note de match) : prime sur le "?" du niveau actuel inconnu.
+  const useEstimate = estimate && skill.current === null
+  let curLabel
+  if (useEstimate) {
+    curLabel = `~${estimate.estimate} (${estimate.low}–${estimate.high})`
+  } else {
+    curLabel = showCur !== null ? `${curIsPred ? '~' : ''}${showCur} (${getSkillLabel(showCur)})` : '?'
+  }
   const maxLabel = showMax !== null ? `${maxIsPred ? '~' : ''}${showMax} (${getSkillLabel(showMax)})` : '?'
 
   let status = ''
@@ -34,16 +45,25 @@ function SkillBar({ name, skill, prediction, color }) {
     if (gap > 0) status = ` → +${gap}`
   }
 
-  const confidence = (curIsPred || maxIsPred) ? ` (IA: ${pred.confidence || '?'})` : ''
+  const confidence = (curIsPred || maxIsPred) && !useEstimate ? ` (IA: ${pred.confidence || '?'})` : ''
+  const estPct = useEstimate ? (estimate.estimate / MAX) * 100 : 0
 
   return (
     <div className="skill-bar-group">
       <div className="skill-bar-label">
-        <span className="name" style={{ color: skill.maxReached ? 'var(--skill-maxed)' : 'var(--text-primary)' }}>{name}{status}{confidence}</span>
-        <span className="values" style={{ color: (curIsPred || maxIsPred) ? 'var(--accent-cyan)' : 'var(--text-secondary)' }}>{curLabel} / {maxLabel}</span>
+        <span className="name" style={{ color: skill.maxReached ? 'var(--skill-maxed)' : 'var(--text-primary)' }}>
+          {useEstimate && (
+            <span title={`Estimation (confiance ${estimate.confidence}) — ${estimate.basis}`}
+              style={{ display: 'inline-block', width: 9, height: 9, borderRadius: '50%', marginRight: 6,
+                background: CONFIDENCE_DOT[estimate.confidence] || '#94a3b8', verticalAlign: 'middle' }} />
+          )}
+          {name}{status}{confidence}
+        </span>
+        <span className="values" style={{ color: useEstimate ? (CONFIDENCE_DOT[estimate.confidence] || 'var(--accent-cyan)') : ((curIsPred || maxIsPred) ? 'var(--accent-cyan)' : 'var(--text-secondary)') }}>{curLabel} / {maxLabel}</span>
       </div>
       <div className="skill-bar-track">
         {skill.current !== null && <div className="skill-bar-current" style={{ width: `${curPct}%`, background: skill.maxReached ? 'var(--skill-maxed)' : color }} />}
+        {useEstimate && <div className="skill-bar-current" style={{ width: `${estPct}%`, background: color, opacity: 0.4 }} />}
         {skill.max !== null && <div className="skill-bar-max" style={{ left: `${maxPct}%`, borderColor: color }} />}
       </div>
     </div>
@@ -52,6 +72,7 @@ function SkillBar({ name, skill, prediction, color }) {
 
 export default function PlayerDetail({ player, matchReports, predictions, score, playerHistory, onClose }) {
   const pred = predictions?.[player.id]?.skills || {};
+  const skillEstimate = estimateSkillFromRating(player);
   const history = (playerHistory || []).filter(h => h.player_id === player.id);
 
   return (
@@ -103,7 +124,18 @@ export default function PlayerDetail({ player, matchReports, predictions, score,
 
         <div className="detail-section">
           <h3>Compétences</h3>
-          {SKILL_KEYS.map(({ key, name, color }) => <SkillBar key={key} name={name} skill={player.skills[key]} prediction={pred[key]} color={color} />)}
+          {SKILL_KEYS.map(({ key, name, color }) => (
+            <SkillBar key={key} name={name} skill={player.skills[key]} prediction={pred[key]} color={color}
+              estimate={skillEstimate && skillEstimate.skill === key ? skillEstimate : null} />
+          ))}
+          {skillEstimate && (
+            <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)', marginTop: 8, display: 'flex', gap: 14, alignItems: 'center', flexWrap: 'wrap' }}>
+              <span>Estimation (note de match) :</span>
+              <span><span style={{ display: 'inline-block', width: 8, height: 8, borderRadius: '50%', background: '#10b981', marginRight: 4 }} />bonne</span>
+              <span><span style={{ display: 'inline-block', width: 8, height: 8, borderRadius: '50%', background: '#f59e0b', marginRight: 4 }} />moyenne</span>
+              <span><span style={{ display: 'inline-block', width: 8, height: 8, borderRadius: '50%', background: '#ef4444', marginRight: 4 }} />faible</span>
+            </div>
+          )}
           {predictions?.[player.id]?.updatedAt && (
             <div style={{ fontSize: '0.72rem', color: 'var(--text-muted)', marginTop: 8 }}>
               Prédictions IA du {formatDateFR(predictions[player.id].updatedAt)}
