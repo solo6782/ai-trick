@@ -3,7 +3,7 @@ import { askPromotions, askDismissals } from '../utils/aiService'
 import { saveSetting, loadSettings } from '../utils/storage'
 import { formatDateFR } from '../utils/hrfParser'
 
-export default function AIAlerts({ hrfData, matchReports }) {
+export default function AIAlerts({ hrfData }) {
   const [promoResponse, setPromoResponse] = useState('')
   const [promoLoading, setPromoLoading] = useState(false)
   const [promoCollapsed, setPromoCollapsed] = useState(true) // collapsed by default
@@ -30,7 +30,7 @@ export default function AIAlerts({ hrfData, matchReports }) {
   async function handlePromo() {
     setPromoLoading(true); setError(''); setPromoCollapsed(false)
     try {
-      const result = await askPromotions(hrfData, matchReports)
+      const result = await askPromotions(hrfData)
       const now = new Date().toISOString()
       setPromoResponse(result)
       setPromoDate(now)
@@ -43,7 +43,7 @@ export default function AIAlerts({ hrfData, matchReports }) {
   async function handleDismiss() {
     setDismissLoading(true); setError(''); setDismissCollapsed(false)
     try {
-      const result = await askDismissals(hrfData, matchReports)
+      const result = await askDismissals(hrfData)
       const now = new Date().toISOString()
       setDismissResponse(result)
       setDismissDate(now)

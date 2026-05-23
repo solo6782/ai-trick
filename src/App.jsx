@@ -1,17 +1,15 @@
 import { useState, useEffect } from 'react'
 import { parseHRF, formatDateFR } from './utils/hrfParser'
-import { loadHRFData, saveHRFData, loadMatchReports, saveMatchReport, deleteMatchReport, loadSettings, saveSetting, loadPredictions, savePredictions, loadPlayerHistory } from './utils/storage'
+import { loadHRFData, saveHRFData, loadSettings, saveSetting, loadPredictions, savePredictions, loadPlayerHistory } from './utils/storage'
 import { calculatePotentialScore } from './utils/scoreCalculator'
 import { askPredictions } from './utils/aiService'
 import { VERSION } from './version'
 import PlayerTable from './components/PlayerTable'
 import PlayerDetail from './components/PlayerDetail'
 import ImportHRFModal from './components/ImportHRFModal'
-import ImportReportModal from './components/ImportReportModal'
 import RecruitmentModal from './components/RecruitmentModal'
 import CompositionPanel from './components/CompositionPanel'
 import AIAlerts from './components/AIAlerts'
-import ReportsPage from './components/ReportsPage'
 import ChangelogModal from './components/ChangelogModal'
 import Settings from './components/Settings'
 
@@ -58,11 +56,9 @@ function generateAnalysisChangelog(oldPreds, newPreds, players) {
 export default function App() {
   const [page, setPage] = useState('dashboard')
   const [hrfData, setHrfData] = useState(null)
-  const [matchReports, setMatchReports] = useState({})
   const [hasApiKey, setHasApiKey] = useState(false)
   const [selectedPlayer, setSelectedPlayer] = useState(null)
   const [showImportHRF, setShowImportHRF] = useState(false)
-  const [showImportReport, setShowImportReport] = useState(false)
   const [showRecruitment, setShowRecruitment] = useState(false)
   const [showComposition, setShowComposition] = useState(false)
   const [showChangelog, setShowChangelog] = useState(false)
@@ -87,15 +83,13 @@ export default function App() {
   useEffect(() => {
     async function init() {
       try {
-        const [hrf, reports, settings, preds, history] = await Promise.all([
+        const [hrf, settings, preds, history] = await Promise.all([
           loadHRFData(),
-          loadMatchReports(),
           loadSettings(),
           loadPredictions(),
           loadPlayerHistory()
         ]);
         if (hrf) { setHrfData(hrf); recalcScores(hrf.youthPlayers); }
-        if (reports) setMatchReports(reports)
         if (preds) setPredictions(preds)
         if (history) setPlayerHistory(history)
         if (settings?.analysis_date) setAnalysisDate(settings.analysis_date)
@@ -121,25 +115,6 @@ export default function App() {
     const history = await loadPlayerHistory()
     setPlayerHistory(history)
     setShowImportHRF(false)
-  }
-
-  async function handleReportSave(matchId, report) {
-    await saveMatchReport(matchId, report)
-    const reports = await loadMatchReports()
-    setMatchReports(reports)
-    setShowImportReport(false)
-  }
-
-  async function handleReportDelete(matchId) {
-    await deleteMatchReport(matchId)
-    const reports = await loadMatchReports()
-    setMatchReports(reports)
-  }
-
-  async function handleReportEdit(matchId, report) {
-    await saveMatchReport(matchId, report)
-    const reports = await loadMatchReports()
-    setMatchReports(reports)
   }
 
   // Force classification rules that the AI keeps ignoring
@@ -241,7 +216,7 @@ export default function App() {
     setAnalyzing(true)
     setAnalyzeResult(null)
     try {
-      const rawPreds = await askPredictions(hrfData, matchReports)
+      const rawPreds = await askPredictions(hrfData)
 
       // Post-process: force classification rules the AI ignores
       const correctedPreds = enforceClassification(rawPreds)
@@ -319,9 +294,6 @@ export default function App() {
           <button className="btn btn-primary" onClick={() => setShowImportHRF(true)}>
             📂 Importer HRF
           </button>
-          <button className="btn btn-blue" onClick={() => setShowImportReport(true)} disabled={!hrfData}>
-            📋 Rapport
-          </button>
           <button className="btn btn-orange" onClick={() => setShowRecruitment(true)} disabled={!hrfData || !hasApiKey}>
             🔍 Recrutement
           </button>
@@ -338,9 +310,6 @@ export default function App() {
       <nav className="nav-tabs">
         <button className={`nav-tab ${page === 'dashboard' ? 'active' : ''}`} onClick={() => setPage('dashboard')}>
           Tableau de bord
-        </button>
-        <button className={`nav-tab ${page === 'reports' ? 'active' : ''}`} onClick={() => setPage('reports')}>
-          Rapports ({Object.keys(matchReports).length})
         </button>
         <button className={`nav-tab ${page === 'settings' ? 'active' : ''}`} onClick={() => setPage('settings')}>
           Paramètres
@@ -364,7 +333,7 @@ export default function App() {
             </div>
           ) : (
             <>
-              <AIAlerts hrfData={hrfData} matchReports={matchReports} />
+              <AIAlerts hrfData={hrfData} />
 
               {/* Analysis status section */}
               <div className="alert-card" style={{ marginBottom: 20, borderColor: 'var(--accent-cyan)', background: 'rgba(6,182,212,0.05)' }}>
@@ -400,13 +369,10 @@ export default function App() {
 
       {page === 'settings' && <Settings onApiKeyChange={setHasApiKey} />}
 
-      {page === 'reports' && <ReportsPage matchReports={matchReports} playerHistory={playerHistory} onDelete={handleReportDelete} onEdit={handleReportEdit} onImportReport={() => setShowImportReport(true)} />}
-
       {showImportHRF && <ImportHRFModal onImport={handleHRFImport} onHistoryImported={async () => { const h = await loadPlayerHistory(); setPlayerHistory(h); }} onClose={() => setShowImportHRF(false)} />}
-      {showImportReport && hrfData && <ImportReportModal players={hrfData.youthPlayers} existingReports={matchReports} onSave={handleReportSave} onClose={() => setShowImportReport(false)} />}
       {showRecruitment && <RecruitmentModal hrfData={hrfData} onClose={() => setShowRecruitment(false)} />}
-      {showComposition && <CompositionPanel hrfData={hrfData} matchReports={matchReports} predictions={predictions} onClose={() => setShowComposition(false)} />}
-      {selectedPlayer && <PlayerDetail player={selectedPlayer} matchReports={matchReports} predictions={predictions} score={scores[selectedPlayer.id]} playerHistory={playerHistory} onClose={() => setSelectedPlayer(null)} />}
+      {showComposition && <CompositionPanel hrfData={hrfData} predictions={predictions} onClose={() => setShowComposition(false)} />}
+      {selectedPlayer && <PlayerDetail player={selectedPlayer} predictions={predictions} score={scores[selectedPlayer.id]} playerHistory={playerHistory} onClose={() => setSelectedPlayer(null)} />}
       {showChangelog && <ChangelogModal onClose={() => setShowChangelog(false)} />}
     </div>
   )

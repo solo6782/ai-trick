@@ -70,7 +70,7 @@ function SkillBar({ name, skill, prediction, color, estimate }) {
   )
 }
 
-export default function PlayerDetail({ player, matchReports, predictions, score, playerHistory, onClose }) {
+export default function PlayerDetail({ player, predictions, score, playerHistory, onClose }) {
   const pred = predictions?.[player.id]?.skills || {};
   const skillEstimate = estimateSkillFromRating(player);
   const history = (playerHistory || []).filter(h => h.player_id === player.id);

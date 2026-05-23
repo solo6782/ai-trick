@@ -85,15 +85,6 @@ Blessé: ${player.isInjured ? 'OUI' : 'Non'} | Cartons: ${player.cards} | Buts: 
 Compétences:\n${skills}\n${lm}\n${histStr}Scout:\n${scouts || '  Aucun'}\n`;
 }
 
-function formatReports(reports) {
-  if (!reports || Object.keys(reports).length === 0) return '';
-  const blocks = Object.entries(reports)
-    .filter(([, r]) => r.notesDetaillees)
-    .map(([id, r]) => `\n### Match ${id} (${r.date || '?'})\n**Notes détaillées:**\n${r.notesDetaillees}\n`);
-  if (blocks.length === 0) return '';
-  return '\n## RAPPORTS DE MATCH\n' + blocks.join('\n');
-}
-
 const MODEL_OPUS = 'claude-opus-4-6';
 const MODEL_SONNET = 'claude-sonnet-4-6';
 
@@ -109,7 +100,7 @@ function logUsage(label, data) {
   );
 }
 
-async function callAI(userMessage, hrfData, matchReports = {}, model = MODEL_OPUS, opts = {}) {
+async function callAI(userMessage, hrfData, model = MODEL_OPUS, opts = {}) {
   const { includeTeam = true, label = 'callAI' } = opts;
   const apiKey = await loadApiKey();
   if (!apiKey) throw new Error('Clé API Anthropic non configurée. Va dans les Paramètres.');
@@ -133,7 +124,6 @@ async function callAI(userMessage, hrfData, matchReports = {}, model = MODEL_OPU
     context += `Entraînement senior: ${hrfData.training.type} (intensité: ${hrfData.training.level}%, endurance: ${hrfData.training.staminaPart}%)\n\n`;
     context += `## EFFECTIF JUNIOR (${hrfData.youthPlayers.length} joueurs)\n\n`;
     context += hrfData.youthPlayers.map(p => formatPlayerForAI(p, history)).join('\n---\n');
-    context += formatReports(matchReports);
     messageBlocks.push({ type: 'text', text: context, cache_control: { type: 'ephemeral' } });
   }
   // The question varies per call → not cached.
@@ -153,7 +143,7 @@ async function callAI(userMessage, hrfData, matchReports = {}, model = MODEL_OPU
 
 // ── STEP 1: Analyze (predict skills + classify players) ──
 
-export async function askPredictions(hrfData, matchReports) {
+export async function askPredictions(hrfData) {
   const playerIds = hrfData.youthPlayers.map(p => `${p.id} (${p.name})`);
   const response = await callAI(
     `Analyse CHAQUE joueur. Pour chacun, suis cet ALGORITHME dans cet ORDRE EXACT :
@@ -189,7 +179,7 @@ Réponds UNIQUEMENT avec le JSON :
 
 Chaque compétence = null (si connue) ou {"current":N,"max":N,"confidence":"low/medium/high"} (si inconnue et estimable).
 
-Joueurs : ${playerIds.join(', ')}`, hrfData, matchReports, MODEL_SONNET, { label: 'predictions' });
+Joueurs : ${playerIds.join(', ')}`, hrfData, MODEL_SONNET, { label: 'predictions' });
 
   // Robust JSON extraction
   const parsed = extractJSON(response);
@@ -245,7 +235,7 @@ async function callAICompo(message, model = MODEL_OPUS, label = 'compo') {
   return data.content?.[0]?.text || 'Pas de réponse.';
 }
 
-export async function askComposition(hrfData, matchReports, predictions) {
+export async function askComposition(hrfData, predictions) {
   const playerList = buildCompactPlayerList(hrfData, predictions);
   const training = hrfData?.training?.type || 'inconnu';
 
@@ -267,7 +257,7 @@ Réponds UNIQUEMENT avec le JSON ci-dessous, RIEN d'autre :
 {"primaryTraining":"X","secondaryTraining":"Y","trainingJustification":"1 phrase","tactic":"Jeu créatif","formation":"X-X-X","lineup":[{"position":"Poste","playerId":"ID","playerName":"Nom","order":"Normal","reason":"10 mots max"}],"subs":[{"playerName":"Nom","reason":"10 mots max"}],"substitutions":[{"minute":89,"out":"Nom","in":"Nom","position":"Poste","reason":"10 mots max"}],"trainingChange":null,"summary":"2 phrases max"}`);
 }
 
-export async function askCompositionPlanB(hrfData, matchReports, feedback = '', predictions = null) {
+export async function askCompositionPlanB(hrfData, feedback = '', predictions = null) {
   const playerList = buildCompactPlayerList(hrfData, predictions);
   const extra = feedback ? `\nRaison du refus : ${feedback}` : '';
 
@@ -287,19 +277,19 @@ export async function askRecruitment(hrfData, profiles) {
 
 PROFIL 1:\n${profiles[0] || '(vide)'}\n\nPROFIL 2:\n${profiles[1] || '(vide)'}\n\nPROFIL 3:\n${profiles[2] || '(vide)'}
 
-Compare entre eux. Meilleur potentiel brut, indépendamment des besoins.`, hrfData, {}, MODEL_SONNET, { includeTeam: false, label: 'recruitment' });
+Compare entre eux. Meilleur potentiel brut, indépendamment des besoins.`, hrfData, MODEL_SONNET, { includeTeam: false, label: 'recruitment' });
 }
 
-export async function askPromotions(hrfData, matchReports) {
+export async function askPromotions(hrfData) {
   return callAI(`Analyse chaque joueur promouvable. Pour chacun :
 - "PROMOUVOIR MAINTENANT" (vendre / intégrer / va expirer)
 - "ATTENDRE" (progression en cours, ups restants)
 - "NE PAS PROMOUVOIR" (sans valeur)
-Entraînement senior : ${hrfData?.training?.type || 'inconnu'}.`, hrfData, matchReports, MODEL_SONNET, { label: 'promotions' });
+Entraînement senior : ${hrfData?.training?.type || 'inconnu'}.`, hrfData, MODEL_SONNET, { label: 'promotions' });
 }
 
-export async function askDismissals(hrfData, matchReports) {
+export async function askDismissals(hrfData) {
   return callAI(`Effectif : ${hrfData?.youthPlayers?.length || '?'} joueurs (seuil : 14 max).
 Identifie les candidats au licenciement, du moins utile au plus utile. Justifie.
-JAMAIS licencier un joueur au potentiel largement inconnu.`, hrfData, matchReports, MODEL_SONNET, { label: 'dismissals' });
+JAMAIS licencier un joueur au potentiel largement inconnu.`, hrfData, MODEL_SONNET, { label: 'dismissals' });
 }

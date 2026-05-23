@@ -211,7 +211,7 @@ function CompoDetails({ data, players, onShowPlayer }) {
   )
 }
 
-export default function CompositionPanel({ hrfData, matchReports, predictions, onClose }) {
+export default function CompositionPanel({ hrfData, predictions, onClose }) {
   const [parsed, setParsed] = useState(null)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
@@ -244,7 +244,7 @@ export default function CompositionPanel({ hrfData, matchReports, predictions, o
   async function handleAsk() {
     setLoading(true); setError('')
     try {
-      const raw = await askComposition(hrfData, matchReports, predictions)
+      const raw = await askComposition(hrfData, predictions)
       const p = parseCompoResponse(raw)
       setParsed(p)
       await saveCompo(p)
@@ -255,7 +255,7 @@ export default function CompositionPanel({ hrfData, matchReports, predictions, o
   async function handlePlanB() {
     setLoading(true); setError('')
     try {
-      const raw = await askCompositionPlanB(hrfData, matchReports, planBFeedback, predictions)
+      const raw = await askCompositionPlanB(hrfData, planBFeedback, predictions)
       const p = parseCompoResponse(raw)
       setParsed(p)
       await saveCompo(p)

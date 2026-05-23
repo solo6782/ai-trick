@@ -23,37 +23,6 @@ export async function loadHRFData() {
   }
 }
 
-// ── Match Reports ──
-
-export async function saveMatchReport(matchId, report) {
-  await fetch('/api/reports', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({
-      matchId,
-      date: report.date,
-      notesDetaillees: report.notesDetaillees
-    })
-  });
-}
-
-export async function loadMatchReports() {
-  try {
-    const res = await fetch('/api/reports');
-    return await res.json();
-  } catch {
-    return {};
-  }
-}
-
-export async function deleteMatchReport(matchId) {
-  await fetch('/api/reports', {
-    method: 'DELETE',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ matchId })
-  });
-}
-
 // ── AI Predictions ──
 
 export async function savePredictions(players) {

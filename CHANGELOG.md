@@ -2,6 +2,15 @@
 
 Toutes les modifications notables de **ai-trick** sont documentées ici.
 
+## [0.9.16] - 2026-05-24
+
+### Supprimé
+- **Suppression complète des rapports de match (CR / notes de secteur)** : fonctionnalité retirée de bout en bout.
+  - Tables/DB : `match_reports` supprimée (migration `0005_drop_match_reports.sql`).
+  - UI : onglet Rapports, modale d'import, affichage — tout retiré.
+  - Prompts IA : les notes de secteur ne sont plus injectées dans composition, plan B, promotions ni licenciements.
+  - Raison : aucune valeur ajoutée mesurée. Les notes de secteur ne correspondaient à aucune des 3 sources du triangle d'analyse (caracs HRF, notes individuelles par poste, phrases coach/scout), et n'amélioraient pas l'estimation des caracs (testé, sans gain). Bénéfice : moins de tokens envoyés à chaque analyse, code et DB allégés.
+
 ## [0.9.15] - 2026-05-24
 
 ### Ajouté
