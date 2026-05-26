@@ -2,6 +2,21 @@
 
 Toutes les modifications notables de **ai-trick** sont documentées ici.
 
+## [0.9.17] - 2026-05-25
+
+### Sécurité (correctif critique)
+- **Faille corrigée : la clé API Anthropic était exposée publiquement.** L'endpoint `GET /api/settings` renvoyait toute la table `settings` (dont `api_key`) sans authentification et avec un CORS ouvert (`*`), rendant la clé lisible par n'importe qui via l'URL publique. C'est l'origine d'une consommation frauduleuse de crédits.
+- **La clé API devient un secret serveur** : lue uniquement depuis `env.ANTHROPIC_API_KEY` (variable d'environnement Cloudflare), jamais stockée en DB ni envoyée au navigateur.
+- `GET/POST /api/settings` : la clé `api_key` est désormais filtrée (jamais renvoyée, jamais acceptée).
+- **CORS resserré** sur tous les endpoints (`chat`, `settings`, `hrf`, `history`, `predictions`) : restreint à `https://ai-trick.pages.dev` au lieu de `*`.
+- Le navigateur n'envoie plus jamais la clé ; le champ de saisie dans Paramètres est remplacé par une note expliquant la configuration côté Cloudflare.
+
+### Action requise après déploiement
+1. Révoquer l'ancienne clé compromise (fait).
+2. Créer une nouvelle clé API Anthropic.
+3. Dans Cloudflare Pages → projet ai-trick → Settings → Variables and Secrets : ajouter `ANTHROPIC_API_KEY` (type Secret) avec la nouvelle clé.
+4. Purger l'ancienne clé de la DB : `DELETE FROM settings WHERE key = 'api_key';`
+
 ## [0.9.16] - 2026-05-24
 
 ### Supprimé

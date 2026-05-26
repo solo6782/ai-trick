@@ -1,5 +1,5 @@
 const CORS = {
-  'Access-Control-Allow-Origin': '*',
+  'Access-Control-Allow-Origin': 'https://ai-trick.pages.dev',
   'Access-Control-Allow-Methods': 'POST, OPTIONS',
   'Access-Control-Allow-Headers': 'Content-Type',
   'Content-Type': 'application/json'
@@ -11,11 +11,13 @@ export async function onRequestOptions() {
 
 export async function onRequestPost(context) {
   try {
-    const { apiKey, system, message, model, systemBlocks, messageBlocks } = await context.request.json();
+    const { system, message, model, systemBlocks, messageBlocks } = await context.request.json();
 
+    // La clé API vient UNIQUEMENT du secret serveur Cloudflare, jamais du navigateur.
+    const apiKey = context.env.ANTHROPIC_API_KEY;
     if (!apiKey) {
-      return new Response(JSON.stringify({ error: 'API key missing' }), {
-        status: 400, headers: CORS
+      return new Response(JSON.stringify({ error: 'Clé API non configurée côté serveur (secret ANTHROPIC_API_KEY manquant).' }), {
+        status: 500, headers: CORS
       });
     }
 

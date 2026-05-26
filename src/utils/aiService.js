@@ -1,5 +1,5 @@
 import { buildFullPrompt } from '../data/systemPrompt.js';
-import { loadApiKey, loadCustomNotes, loadPlayerHistory } from './storage.js';
+import { loadCustomNotes, loadPlayerHistory } from './storage.js';
 import { getSkillLabel, getPositionLabel } from './hrfParser.js';
 
 /**
@@ -102,8 +102,6 @@ function logUsage(label, data) {
 
 async function callAI(userMessage, hrfData, model = MODEL_OPUS, opts = {}) {
   const { includeTeam = true, label = 'callAI' } = opts;
-  const apiKey = await loadApiKey();
-  if (!apiKey) throw new Error('Clé API Anthropic non configurée. Va dans les Paramètres.');
 
   const customNotes = await loadCustomNotes();
   const systemPrompt = buildFullPrompt(customNotes);
@@ -132,7 +130,7 @@ async function callAI(userMessage, hrfData, model = MODEL_OPUS, opts = {}) {
   const res = await fetch('/api/chat', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ apiKey, model, systemBlocks, messageBlocks })
+    body: JSON.stringify({ model, systemBlocks, messageBlocks })
   });
 
   if (!res.ok) { const e = await res.text(); throw new Error(`Erreur API: ${res.status} — ${e}`); }
@@ -213,9 +211,6 @@ function buildCompactPlayerList(hrfData, predictions) {
 }
 
 async function callAICompo(message, model = MODEL_OPUS, label = 'compo') {
-  const apiKey = await loadApiKey();
-  if (!apiKey) throw new Error('Clé API Anthropic non configurée.');
-
   const customNotes = await loadCustomNotes();
   const systemPrompt = buildFullPrompt(customNotes);
 
@@ -226,7 +221,7 @@ async function callAICompo(message, model = MODEL_OPUS, label = 'compo') {
   const res = await fetch('/api/chat', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ apiKey, model, systemBlocks, messageBlocks: [{ type: 'text', text: message }] })
+    body: JSON.stringify({ model, systemBlocks, messageBlocks: [{ type: 'text', text: message }] })
   });
 
   if (!res.ok) { const e = await res.text(); throw new Error(`Erreur API: ${res.status} — ${e}`); }

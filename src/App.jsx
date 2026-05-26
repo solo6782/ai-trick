@@ -56,7 +56,6 @@ function generateAnalysisChangelog(oldPreds, newPreds, players) {
 export default function App() {
   const [page, setPage] = useState('dashboard')
   const [hrfData, setHrfData] = useState(null)
-  const [hasApiKey, setHasApiKey] = useState(false)
   const [selectedPlayer, setSelectedPlayer] = useState(null)
   const [showImportHRF, setShowImportHRF] = useState(false)
   const [showRecruitment, setShowRecruitment] = useState(false)
@@ -96,7 +95,6 @@ export default function App() {
         if (settings?.analysis_log) {
           try { setAnalysisLog(JSON.parse(settings.analysis_log)) } catch {}
         }
-        setHasApiKey(!!settings?.api_key)
       } catch (e) {
         console.error('Init error:', e)
       } finally {
@@ -294,13 +292,13 @@ export default function App() {
           <button className="btn btn-primary" onClick={() => setShowImportHRF(true)}>
             📂 Importer HRF
           </button>
-          <button className="btn btn-orange" onClick={() => setShowRecruitment(true)} disabled={!hrfData || !hasApiKey}>
+          <button className="btn btn-orange" onClick={() => setShowRecruitment(true)} disabled={!hrfData}>
             🔍 Recrutement
           </button>
-          <button className="btn btn-purple" onClick={() => setShowComposition(true)} disabled={!hrfData || !hasApiKey}>
+          <button className="btn btn-purple" onClick={() => setShowComposition(true)} disabled={!hrfData}>
             📝 Composition
           </button>
-          <button className="btn" onClick={handleAnalyze} disabled={!hrfData || !hasApiKey || analyzing}
+          <button className="btn" onClick={handleAnalyze} disabled={!hrfData || analyzing}
             style={{ borderColor: 'var(--accent-cyan)', color: 'var(--accent-cyan)' }}>
             {analyzing ? <><span className="loading-spinner" style={{ borderTopColor: 'var(--accent-cyan)' }} /> Analyse...</> : '🧠 Analyser'}
           </button>
@@ -367,7 +365,7 @@ export default function App() {
         </>
       )}
 
-      {page === 'settings' && <Settings onApiKeyChange={setHasApiKey} />}
+      {page === 'settings' && <Settings />}
 
       {showImportHRF && <ImportHRFModal onImport={handleHRFImport} onHistoryImported={async () => { const h = await loadPlayerHistory(); setPlayerHistory(h); }} onClose={() => setShowImportHRF(false)} />}
       {showRecruitment && <RecruitmentModal hrfData={hrfData} onClose={() => setShowRecruitment(false)} />}

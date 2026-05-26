@@ -1,26 +1,18 @@
 import { useState, useEffect } from 'react'
-import { loadSettings, saveApiKey, saveCustomNotes } from '../utils/storage'
+import { loadSettings, saveCustomNotes } from '../utils/storage'
 import { VERSION } from '../version'
 
-export default function Settings({ onApiKeyChange }) {
-  const [apiKey, setApiKey] = useState('')
+export default function Settings() {
   const [notes, setNotes] = useState('')
   const [saved, setSaved] = useState('')
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
     loadSettings().then(s => {
-      setApiKey(s.api_key || '')
       setNotes(s.custom_notes || '')
       setLoading(false)
     })
   }, [])
-
-  async function handleSaveKey() {
-    await saveApiKey(apiKey)
-    onApiKeyChange(!!apiKey)
-    setSaved('Clé API sauvegardée'); setTimeout(() => setSaved(''), 2000)
-  }
 
   async function handleSaveNotes() {
     await saveCustomNotes(notes)
@@ -37,17 +29,13 @@ export default function Settings({ onApiKeyChange }) {
 
       <div className="alert-card alert-info" style={{ marginBottom: 24 }}>
         <h3>🔑 Clé API Anthropic</h3>
-        <p style={{ marginBottom: 12 }}>
-          Nécessaire pour les analyses IA. Ta clé est stockée dans la base D1 de ton app et envoyée directement à l'API Anthropic.
+        <p style={{ marginBottom: 0 }}>
+          La clé API est désormais stockée comme <strong>secret serveur</strong> dans Cloudflare
+          (variable d'environnement <span style={{ fontFamily: 'var(--font-mono)' }}>ANTHROPIC_API_KEY</span>),
+          jamais exposée au navigateur. Pour la définir ou la changer : tableau de bord Cloudflare →
+          ton projet Pages <span style={{ fontFamily: 'var(--font-mono)' }}>ai-trick</span> → Settings →
+          Variables and Secrets → ajouter <span style={{ fontFamily: 'var(--font-mono)' }}>ANTHROPIC_API_KEY</span> en type <em>Secret</em>.
         </p>
-        <div style={{ display: 'flex', gap: 8 }}>
-          <input
-            type="password" value={apiKey} onChange={e => setApiKey(e.target.value)}
-            placeholder="sk-ant-..."
-            style={{ flex: 1, padding: '10px 14px', background: 'var(--bg-input)', border: '1px solid var(--border)', borderRadius: 'var(--radius-sm)', color: 'var(--text-primary)', fontFamily: 'var(--font-mono)', fontSize: '0.82rem' }}
-          />
-          <button className="btn btn-primary" onClick={handleSaveKey}>Sauvegarder</button>
-        </div>
       </div>
 
       <div className="alert-card" style={{ background: 'var(--bg-card)', borderColor: 'var(--border)', marginBottom: 24 }}>

@@ -81,15 +81,6 @@ export async function loadSettings() {
   }
 }
 
-export async function saveApiKey(key) {
-  return saveSetting('api_key', key);
-}
-
-export async function loadApiKey() {
-  const settings = await loadSettings();
-  return settings.api_key || '';
-}
-
 export async function saveCustomNotes(notes) {
   return saveSetting('custom_notes', notes);
 }
